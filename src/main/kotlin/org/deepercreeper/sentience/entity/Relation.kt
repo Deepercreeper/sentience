@@ -5,12 +5,16 @@ import javax.persistence.*
 
 @Entity
 class Relation(
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
-    @ManyToOne val left: Symbol,
-    @ManyToOne val right: Symbol,
-    val distance: Double = 1.0
+        @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
+        @ManyToOne val left: Symbol,
+        @ManyToOne val right: Symbol,
+        val distance: Double = 1.0
 ) : Comparable<Relation> {
     val symbols get() = setOf(left, right)
+
+    init {
+        require(distance > 0)
+    }
 
     constructor(left: Symbol, right: Symbol, distance: Double = 1.0) : this(null, left, right, distance)
 

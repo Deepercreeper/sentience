@@ -41,7 +41,9 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
             if (current.second == right) return current.first
             neighboursOf(current.second).filter { it.other(current.second) in unvisited }.forEach { relation ->
                 val other = relation.other(current.second)
-                distances.compute(other) { _, distance -> min(current.first + relation.distance, distance ?: Double.POSITIVE_INFINITY) }
+                distances.compute(other) { _, distance ->
+                    min(current.first + relation.distance, distance ?: Double.POSITIVE_INFINITY)
+                }
             }
             unvisited -= current.second
             current = unvisited.asSequence().mapNotNull { distances[it]?.to(it) }.minByOrNull { it.first }!!

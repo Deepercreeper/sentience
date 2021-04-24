@@ -8,53 +8,44 @@ import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 
-class WordTaggerConfig(var key: String, var word: String, val symbolService: SymbolService) : TaggerConfig {
-    override fun create(document: Document) = WordTagger(key, createWord(), document)
-
-    private fun createWord(): Word {
-
-    }
+class WordTaggerConfig(var key: String, var word: String, private val symbolService: SymbolService) : TaggerConfig {
+    override fun create(document: Document) = WordTagger(key, Word(word, symbolService), document)
 }
 
 class WordTagger(private val key: String, private val word: Word, document: Document) : Tagger(document) {
     override fun init() = register(TokenTagger.KEY, this::process)
 
     private fun process(tag: Tag) {
-        if (matches(document[tag])) tags += Tag(key, tag.start, tag.length)
-    }
-
-    private fun matches(token: String): Boolean {
-        //TODO Parse the token using symbols and relations
-        //TODO Maybe do this either lazy and cache the result in the tag or inside the token tagger
-        return false
+        if (word.matches(document[tag])) tags += Tag(key, tag.start, tag.length)
     }
 }
 
 class Word(word: String, symbolService: SymbolService) {
-    private val parts = parse(word, symbolService)
+    private val node = WordParser(word, symbolService).parse()
 
     fun matches(token: String): Boolean {
-        /*
-         * TODO:
-         *  - For each part:
-         *   - Check if the part matches the current token part
-         */
+        //TODO Iterate simultaneously through the nodes and return true if we end on a terminal node
         return true
     }
+}
 
-    private fun parse(word: String, symbolService: SymbolService): List<Part> {
-        /*
-         * TODO:
-         *  1. Cut word into parts, that are independent from each other when looking at relations
-         *  2. Expand each of those parts into a complete list of possible combinations using relations
-         *  3. Return a list of expanded or literal parts
-         */
-        return emptyList()
+private class Node(val text: String = "", val distance: Double = 0.0) {
+    private val nodes = mutableMapOf<String, Node>()
+
+    fun appendAll(text: String) {
+        var node = this
+        for (char in text) node = node.append(char.toString())
     }
 
-    interface Part {
-        class Literal : Part
+    fun append(text: String) = Node(this.text + text).also { nodes += text to it }
+}
 
-        class Options : Part
+private class WordParser(word: String, symbolService: SymbolService) {
+    private val node = Node().also { it.appendAll(word) }
+
+    fun parse(): Node {
+        //TODO Expand existing nodes using relations until nothing changes or a max distance is reached
+
+        return node
     }
 }
