@@ -21,11 +21,12 @@ class TokenTaggerTest {
         }
     }
 
+    private val engine = TaggerEngine(document, TokenTaggerConfig(), SimpleTaggerConfig { counter })
+
     @Test
     fun test() {
-        val engine = TaggerEngine(document, TokenTaggerConfig(), SimpleTaggerConfig { counter })
         engine.process()
         assertEquals(tokens.size, counter.count)
-        assertEquals(tokens, engine.tags.map { document[it] })
+        assertEquals(tokens, engine.tags.tags.map { document[it] })
     }
 }

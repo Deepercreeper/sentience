@@ -27,7 +27,6 @@ class TokenTagger(document: Document) : Tagger(document) {
     }
 
     private fun addToken(start: Int, length: Int) {
-
         tags += Tag(KEY, start, length, Tag.Type.TOKEN)
     }
 

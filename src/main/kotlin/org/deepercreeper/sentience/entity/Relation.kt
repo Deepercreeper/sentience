@@ -5,10 +5,10 @@ import javax.persistence.*
 
 @Entity
 class Relation(
-        @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
-        @ManyToOne val left: Symbol,
-        @ManyToOne val right: Symbol,
-        val distance: Double = 1.0
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
+    @ManyToOne val left: Symbol,
+    @ManyToOne val right: Symbol,
+    val distance: Double = 1.0
 ) : Comparable<Relation> {
     val symbols get() = setOf(left, right)
 
@@ -23,6 +23,12 @@ class Relation(
         right -> left
         else -> throw IllegalArgumentException("Symbol $symbol not part of relation $this")
     }
+
+    operator fun component1() = left
+
+    operator fun component2() = right
+
+    operator fun component3() = distance
 
     operator fun contains(symbol: Symbol) = left == symbol || right == symbol
 

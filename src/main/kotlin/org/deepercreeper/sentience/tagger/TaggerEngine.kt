@@ -7,12 +7,14 @@ import org.deepercreeper.sentience.util.logger
 import java.util.*
 
 
-class TaggerEngine private constructor(private val document: Document, configs: List<TaggerConfig>, private val tagManager: TagManager) : HasTags by tagManager {
+class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) {
     private val tagRegistry = KeyRegistry<Tag, String> { it.key }
 
     private val registry = TypeRegistry()
 
     private val events: MutableList<Event> = LinkedList()
+
+    private val tagManager = TagManager()
 
     init {
         tagManager.register(this::fire)
@@ -20,7 +22,7 @@ class TaggerEngine private constructor(private val document: Document, configs: 
         configs.asSequence().map { it.create(document) }.forEach { it.init(this) }
     }
 
-    constructor(document: Document, taggers: List<TaggerConfig>) : this(document, taggers, TagManager())
+    val tags: HasTags get() = tagManager
 
     constructor(document: Document, vararg taggers: TaggerConfig) : this(document, taggers.toList())
 

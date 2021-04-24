@@ -22,7 +22,7 @@ abstract class Tagger(protected val document: Document) {
 
     private lateinit var engine: TaggerEngine
 
-    val tags: HasTags get() = engine
+    val tags: HasTags get() = engine.tags
 
     fun init(engine: TaggerEngine) {
         this.engine = engine

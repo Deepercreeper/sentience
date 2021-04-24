@@ -63,7 +63,7 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
     @Synchronized
     operator fun minusAssign(symbol: Symbol) {
         if (!_symbols.remove(symbol)) return
-        _relations.removeIf { it.left == symbol || it.right == symbol }
+        _relations.removeIf { symbol in it }
         _groups[symbol]!! -= symbol
         _groups -= symbol
         symbolRepository.delete(symbol)
@@ -74,6 +74,8 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
     @Synchronized
     operator fun plusAssign(relation: Relation) {
         require(_symbols.containsAll(relation.symbols)) { "Relation contains unknown symbols: $relation" }
+        checkFinite(relation)
+        checkReduced(relation)
         if (!_relations.add(relation)) return
         added(relation)
         relationRepository.save(relation)
@@ -98,5 +100,16 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
         val group = _groups[relation.left]!!
         group += _groups[relation.right]!!
         group.forEach { _groups[it] = group }
+    }
+
+    private fun checkFinite(relation: Relation) {
+        //TODO Check that, when adding the relation, the possible amount of symbols to be created remains finite
+        // Example: a <-> ac ==> a <-> accc...
+    }
+
+    private fun checkReduced(relation: Relation) {
+        //Maybe just ask if this is meant or not. This isn't necessarily bad
+        //TODO Check that, when adding the relation, all relations are still in reduced form
+        // Example: a <-> b, ac <-> bd ==> ac <-> ad <-> bc <-> bd <== a <-> b, c <-> d
     }
 }
