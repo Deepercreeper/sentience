@@ -37,11 +37,12 @@ private class Node {
 
     fun add(char: Char) = get(char) ?: Node().also { nodes[char] = it }
 
-    fun relate(text: String, alt: String) {
-        val target = get(text) ?: return
+    fun relate(text: String, alt: String): Boolean {
+        val target = get(text) ?: return false
         var node = this
         for (char in alt.dropLast(1)) node = node.add(char)
         node[alt.last()] = target
+        return true
     }
 
     operator fun set(char: Char, node: Node) {
@@ -78,10 +79,14 @@ private class Node {
     companion object {
         fun parse(word: String, relations: Set<Relation>): Node {
             val node = Node().also { it.addAll(word) }
-            relations.forEach { (left, right) ->
-                node.forEach {
-                    it.relate(left.text, right.text)
-                    it.relate(right.text, left.text)
+            var modified = true
+            while (modified) {
+                modified = false
+                relations.forEach { (left, right) ->
+                    node.forEach {
+                        modified = it.relate(left.text, right.text) || modified
+                        modified = it.relate(right.text, left.text) || modified
+                    }
                 }
             }
             return node
