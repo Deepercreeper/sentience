@@ -24,42 +24,70 @@ class WordTagger(private val key: String, private val word: Word, document: Docu
 class Word(word: String, relations: Set<Relation>) {
     private val node = Node.parse(word, relations)
 
-    fun matches(token: String) = token in node
+    fun matches(token: String) = token.length in node.min..node.max && node.matches(token)
 }
 
-private class Node {
-    private val nodes = mutableMapOf<Char, Node>()
+private class Node(val depth: Double) {
+    private val nodes = mutableMapOf<Char, MutableSet<Node>>()
 
-    fun addAll(text: String) {
-        var node = this
-        for (char in text) node = node.add(char)
+    val terminal get() = nodes.isEmpty()
+
+    val max: Int by lazy { (nodes.values.asSequence().flatten().map { it.max }.maxOrNull() ?: -1) + 1 }
+
+    val min: Int by lazy { (nodes.values.asSequence().flatten().map { it.min }.minOrNull() ?: -1) + 1 }
+
+    constructor(text: String, depth: Double = 0.0) : this(depth) {
+        if (text.isNotEmpty()) nodes[text.first()] = mutableSetOf(Node(text.drop(1), depth + 1))
     }
 
-    fun add(char: Char) = get(char) ?: Node().also { nodes[char] = it }
+    private fun relate(text: String, alt: String) = get(text).map { relate(alt, it) }.any { it }
 
-    fun relate(text: String, alt: String): Boolean {
-        val target = get(text) ?: return false
-        var node = this
-        for (char in alt.dropLast(1)) node = node.add(char)
-        node[alt.last()] = target
+    private fun relate(text: String, target: Node): Boolean {
+        var nodes = setOf(this)
+        var index = 0
+        while (index < text.lastIndex) {
+            val char = text[index]
+            nodes = nodes.asSequence().flatMap { it[char] }.filter { it.depth < target.depth }.toSet().takeIf { it.isNotEmpty() } ?: break
+            index++
+        }
+        if (index == text.lastIndex) {
+            val lastChar = text.last()
+            if (target in nodes.asSequence().flatMap { it[lastChar] }.toSet()) return false
+            return nodes.first().add(lastChar, target)
+        }
+        var node = nodes.first()
+        val depthStep = (target.depth - node.depth) / (text.length - index)
+        while (index < text.lastIndex) {
+            val char = text[index]
+            node = Node(node.depth + depthStep).also { node.add(char, it) }
+            index++
+        }
+        node.add(text.last(), target)
         return true
     }
 
-    operator fun set(char: Char, node: Node) {
-        nodes[char] = node
+    private fun add(char: Char, node: Node) = nodes.computeIfAbsent(char) { mutableSetOf() }.add(node)
+
+    operator fun get(char: Char) = nodes[char] ?: emptySet()
+
+    operator fun get(text: String): Set<Node> {
+        if (text.isEmpty()) return setOf(this)
+        val next = text.drop(1)
+        return nodes[text.first()]?.asSequence()?.flatMap { it[next] }?.toSet() ?: emptySet()
     }
 
-    operator fun get(char: Char) = nodes[char]
-
-    operator fun get(text: String): Node? {
-        var node = this
-        for (char in text) node = node[char] ?: return null
-        return node
+    operator fun contains(text: String): Boolean {
+        if (text.isEmpty()) return true
+        val next = text.drop(1)
+        return nodes[text.first()]?.any { next in it } ?: false
     }
 
-    operator fun contains(char: Char) = char in nodes
-
-    operator fun contains(text: String) = get(text) != null
+    fun matches(text: String): Boolean {
+        if (terminal) return text.isEmpty()
+        if (text.isEmpty()) return false
+        val next = text.drop(1)
+        return nodes[text.first()]?.any { it.matches(next) } ?: false
+    }
 
     fun forEach(operation: (Node) -> Unit) {
         val nodes = LinkedList<Node>()
@@ -70,25 +98,30 @@ private class Node {
             if (node in done) continue
             operation(node)
             done += node
-            nodes += node.nodes.values
+            nodes += node.nodes.values.flatten()
         }
     }
 
     override fun toString() = nodes.keys.toString()
 
     companion object {
+        private const val MAX_ITERATIONS = 10
+
         fun parse(word: String, relations: Set<Relation>): Node {
-            val node = Node().also { it.addAll(word) }
-            var modified = true
-            while (modified) {
-                modified = false
+            val node = Node(word)
+            var iteration = 0
+            while (iteration < MAX_ITERATIONS) {
+                var modified = false
                 relations.forEach { (left, right) ->
                     node.forEach {
-                        modified = it.relate(left.text, right.text) || modified
-                        modified = it.relate(right.text, left.text) || modified
+                        if (it.relate(left.text, right.text)) modified = true
+                        if (it.relate(right.text, left.text)) modified = true
                     }
                 }
+                if (!modified) break
+                iteration++
             }
+            println("Took $iteration iteration(s)")
             return node
         }
     }

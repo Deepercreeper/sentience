@@ -34,9 +34,9 @@ class Relation(
 
     override fun compareTo(other: Relation) = distance.compareTo(other.distance)
 
-    override fun equals(other: Any?) = this === other || other is Relation && setOf(left, right) == setOf(other.left, right)
+    override fun equals(other: Any?) = this === other || other is Relation && symbols == other.symbols
 
-    override fun hashCode() = setOf(left, right).hashCode()
+    override fun hashCode() = symbols.hashCode()
 
     override fun toString() = "$left <-$distance-> $right"
 }
