@@ -109,8 +109,7 @@ private class Node(val depth: Double) {
 
         fun parse(word: String, relations: Set<Relation>): Node {
             val node = Node(word)
-            var iteration = 0
-            while (iteration < MAX_ITERATIONS) {
+            for (i in 1..MAX_ITERATIONS) {
                 var modified = false
                 relations.forEach { (left, right) ->
                     node.forEach {
@@ -119,9 +118,7 @@ private class Node(val depth: Double) {
                     }
                 }
                 if (!modified) break
-                iteration++
             }
-            println("Took $iteration iteration(s)")
             return node
         }
     }
