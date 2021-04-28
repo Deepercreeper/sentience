@@ -68,15 +68,15 @@ private class Node(val depth: Double) {
 
     private fun add(char: Char, node: Node) = nodes.computeIfAbsent(char) { mutableSetOf() }.add(node)
 
-    operator fun get(char: Char) = nodes[char] ?: emptySet()
+    private operator fun get(char: Char) = nodes[char] ?: emptySet()
 
-    operator fun get(text: String): Set<Node> {
+    private operator fun get(text: String): Set<Node> {
         if (text.isEmpty()) return setOf(this)
         val next = text.drop(1)
         return nodes[text.first()]?.asSequence()?.flatMap { it[next] }?.toSet() ?: emptySet()
     }
 
-    operator fun contains(text: String): Boolean {
+    private operator fun contains(text: String): Boolean {
         if (text.isEmpty()) return true
         val next = text.drop(1)
         return nodes[text.first()]?.any { next in it } ?: false
@@ -89,7 +89,7 @@ private class Node(val depth: Double) {
         return nodes[text.first()]?.any { it.matches(next) } ?: false
     }
 
-    fun forEach(operation: (Node) -> Unit) {
+    private fun forEach(operation: (Node) -> Unit) {
         val nodes = LinkedList<Node>()
         val done = mutableSetOf<Node>()
         nodes += this
