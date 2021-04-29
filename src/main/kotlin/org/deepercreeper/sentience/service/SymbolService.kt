@@ -27,6 +27,8 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
         relationRepository.findAll().forEach { this += it }
     }
 
+    fun groupOf(text: String) = get(text)?.let { groupOf(it) }?.asSequence()?.map { it.text }?.toSet() ?: setOf(text)
+
     fun groupOf(symbol: Symbol) = _groups[symbol]!!.toSet()
 
     fun neighboursOf(symbol: Symbol) = _relations.asSequence().filter { symbol in it }
@@ -49,6 +51,9 @@ class SymbolService(private val symbolRepository: SymbolRepository, private val 
             current = unvisited.asSequence().mapNotNull { distances[it]?.to(it) }.minByOrNull { it.first }!!
         }
     }
+
+    @Synchronized
+    operator fun get(text: String) = _symbols.firstOrNull { it.text == text }
 
     @Synchronized
     operator fun plusAssign(symbols: Iterable<Symbol>) = symbols.forEach { plusAssign(it) }

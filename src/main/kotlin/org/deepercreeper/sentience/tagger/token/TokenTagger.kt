@@ -27,14 +27,12 @@ class TokenTagger(document: Document) : Tagger(document) {
     }
 
     private fun addToken(start: Int, length: Int) {
-        tags += Tag(KEY, start, length, Tag.Type.TOKEN)
+        tags += Tag(KEY, start, length, type = Tag.Type.TOKEN)
     }
 
     private fun Char.isBoundary() = isWhitespace()
 
     companion object {
         const val KEY = "token"
-
-        val WORD = "${TokenTagger::class.simpleName}::word"
     }
 }

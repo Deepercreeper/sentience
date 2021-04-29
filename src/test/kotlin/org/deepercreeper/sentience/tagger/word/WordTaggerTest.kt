@@ -26,3 +26,16 @@ class WordTaggerTest {
         assertEquals(10, engine.tags["word"].size)
     }
 }
+
+class NodeTest {
+    @Test
+    fun test() {
+        val relations = sequenceOf(
+            "cx" to "dy",
+            "ad" to "be",
+            "ey" to "fx",
+            "bf" to "ac"
+        ).map { (left, right) -> Relation(Symbol(left), Symbol(right)) }.toSet()
+        Node.parse("acx", relations)
+    }
+}

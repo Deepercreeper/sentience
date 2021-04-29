@@ -10,27 +10,24 @@ import java.util.*
 
 
 class WordTaggerConfig(var key: String, var word: String, private val relations: Set<Relation>) : TaggerConfig {
-    override fun create(document: Document) = WordTagger(key, Word(word, relations), document)
+    override fun create(document: Document) = WordTagger(document, key, word, relations)
 }
 
-class WordTagger(private val key: String, private val word: Word, document: Document) : Tagger(document) {
+class WordTagger(document: Document, private val key: String, word: String, relations: Set<Relation>) : Tagger(document) {
+    private val node = Node.parse(word, relations)
+
     override fun init() = register(TokenTagger.KEY, this::process)
 
     private fun process(tag: Tag) {
-        if (word.matches(document[tag])) tags += Tag(key, tag.start, tag.length)
+        val token = document[tag]
+        if (token.length in node.min..node.max && node.matches(token)) tags += Tag(key, tag.start, tag.length)
     }
 }
 
-class Word(word: String, relations: Set<Relation>) {
-    private val node = Node.parse(word, relations)
-
-    fun matches(token: String) = token.length in node.min..node.max && node.matches(token)
-}
-
-private class Node(val depth: Double) {
+internal class Node(private val depth: Double) {
     private val nodes = mutableMapOf<Char, MutableSet<Node>>()
 
-    val terminal get() = nodes.isEmpty()
+    private val terminal get() = nodes.isEmpty()
 
     val max: Int by lazy { (nodes.values.asSequence().flatten().map { it.max }.maxOrNull() ?: -1) + 1 }
 

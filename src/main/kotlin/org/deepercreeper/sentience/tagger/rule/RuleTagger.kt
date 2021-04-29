@@ -38,7 +38,7 @@ class RuleTagger(
         if (targets.isEmpty()) error("No target found")
         val start = targets.minOf { it.start }
         val end = targets.maxOf { it.end }
-        tags += Tag(key, start, end)
+        tags += Tag(key, start, end - start)
         slots.clear()
     }
 }

@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.entity.Symbol
 import org.deepercreeper.sentience.entity.distance
 import org.deepercreeper.sentience.repository.RelationRepository
 import org.deepercreeper.sentience.repository.SymbolRepository
+import org.deepercreeper.sentience.util.MockUtil
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import kotlin.test.Test
@@ -11,11 +12,7 @@ import kotlin.test.assertEquals
 
 
 class SymbolServiceTest {
-    private val symbolRepository = mock<SymbolRepository> { on { findAll() } doReturn emptyList() }
-
-    private val relationRepository = mock<RelationRepository> { on { findAll() } doReturn emptyList() }
-
-    private val service = SymbolService(symbolRepository, relationRepository)
+    private val service = MockUtil.symbolService()
 
     private val a = Symbol("a")
     private val b = Symbol("b")
