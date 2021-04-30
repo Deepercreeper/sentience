@@ -1,20 +1,24 @@
 package org.deepercreeper.sentience.tagger.rule
 
 import org.deepercreeper.sentience.document.Document
+import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.Tagger
-import org.deepercreeper.sentience.tagger.TaggerConfig
 
-class RuleTaggerConfig(var key: String, val dependencies: MutableSet<String>, val restrictions: MutableSet<Restriction>, val targets: MutableSet<String>) : TaggerConfig {
-    override fun create(document: Document) = RuleTagger(document, key, dependencies.toSet(), restrictions.toSet(), targets.toSet())
-}
+class RuleTaggerConfig(
+    var key: String,
+    val dependencies: MutableSet<String>,
+    val restrictions: MutableSet<Restriction>,
+    val targets: MutableSet<String>
+) : SimpleTaggerConfig({ RuleTagger(it, key, dependencies.toSet(), restrictions.toSet(), targets.toSet()) })
 
-class RuleTagger(
+open class RuleTagger(
     document: Document,
     private val key: String,
     private val dependencies: Set<String>,
     private val restrictions: Set<Restriction>,
-    private val targets: Set<String>
+    private val targets: Set<String>,
+    private val mappings: Map<String, Any>
 ) : Tagger(document) {
     private val slots = mutableMapOf<String, Tag>()
 
@@ -38,7 +42,7 @@ class RuleTagger(
         if (targets.isEmpty()) error("No target found")
         val start = targets.minOf { it.start }
         val end = targets.maxOf { it.end }
-        tags += Tag(key, start, end - start)
+        tags += Tag(key, start, end - start, mappings)
         slots.clear()
     }
 }

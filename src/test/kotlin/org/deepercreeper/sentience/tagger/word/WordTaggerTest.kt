@@ -18,7 +18,7 @@ class WordTaggerTest {
         "a" to "d"
     ).map { (left, right) -> Relation(Symbol(left), Symbol(right)) }.toSet()
 
-    private val engine = TaggerEngine(document, TokenTaggerConfig(), WordTaggerConfig("word", "lockbar", relations))
+    private val engine = TaggerEngine(document, TokenTaggerConfig(), WordTaggerConfig("word", setOf("lockbar"), relations))
 
     @Test
     fun test() {

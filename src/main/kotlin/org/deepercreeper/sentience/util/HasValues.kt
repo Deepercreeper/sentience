@@ -14,12 +14,10 @@ interface HasValues {
     operator fun <T : Any> get(key: String, type: KClass<T>): T?
 }
 
-class ValueMap(vararg mappings: Pair<String, Any>) : HasValues {
-    private val map by lazy { mutableMapOf<String, Any>() }
+class ValueMap(mappings: Map<String, Any>) : HasValues {
+    private val map by lazy { mappings.toMutableMap() }
 
-    init {
-        mappings.takeIf { it.isNotEmpty() }?.forEach { (key, value) -> set(key, value) }
-    }
+    constructor(vararg mappings: Pair<String, Any>) : this(mappings.toMap())
 
     override val keys get() = map.keys.toSet()
 

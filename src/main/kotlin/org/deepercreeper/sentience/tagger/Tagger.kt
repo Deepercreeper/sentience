@@ -20,7 +20,7 @@ abstract class Tagger(protected val document: Document) {
 
     private val registry = TypeRegistry()
 
-    private lateinit var engine: TaggerEngine
+    lateinit var engine: TaggerEngine
 
     val tags: HasTags get() = engine.tags
 
@@ -49,6 +49,10 @@ abstract class Tagger(protected val document: Document) {
     fun unregisterAll() {
         tagRegistry.unregisterAll()
         registry.unregisterAll()
+    }
+
+    companion object {
+        const val VALUE_KEY = "value"
     }
 }
 

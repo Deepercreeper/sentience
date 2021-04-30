@@ -11,6 +11,8 @@ class Tag private constructor(val type: Type, val key: String, val start: Int, v
 
     val end get() = start + length
 
+    constructor(key: String, start: Int, length: Int, mappings: Map<String, Any>, type: Type = Type.TAG) : this(type, key, start, length, ValueMap(mappings))
+
     constructor(key: String, start: Int, length: Int, vararg mappings: Pair<String, Any>, type: Type = Type.TAG) : this(type, key, start, length, ValueMap(*mappings))
 
     override fun compareTo(other: Tag): Int {
