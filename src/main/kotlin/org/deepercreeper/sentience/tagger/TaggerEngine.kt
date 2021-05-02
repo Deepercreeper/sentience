@@ -4,7 +4,6 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.document.HasTags
 import org.deepercreeper.sentience.document.TagManager
 import org.deepercreeper.sentience.util.logger
-import java.util.*
 
 
 class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) {
@@ -12,7 +11,7 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
 
     private val registry = TypeRegistry()
 
-    private val events: MutableList<Event> = LinkedList()
+    private val eventManager = EventManager()
 
     private val tagManager = TagManager()
 
@@ -32,7 +31,7 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
     }
 
     fun fire(event: Event) {
-        events += event
+        eventManager += event
     }
 
     fun process() {
@@ -51,8 +50,10 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
     }
 
     private fun processEvents() {
-        while (events.isNotEmpty()) {
-            registry.handle(events.removeAt(0))
+        var event = eventManager.poll()
+        while (event != null) {
+            registry.handle(event)
+            event = eventManager.poll()
         }
     }
 }
