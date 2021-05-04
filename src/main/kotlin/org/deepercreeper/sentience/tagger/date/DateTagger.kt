@@ -3,7 +3,7 @@ package org.deepercreeper.sentience.tagger.date
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.rule.Condition
-import org.deepercreeper.sentience.tagger.rule.RuleTagger
+import org.deepercreeper.sentience.tagger.rule.AbstractConditionalTagger
 import org.deepercreeper.sentience.tagger.value.NumberTagger
 
 class DateTaggerConfig : SimpleTaggerConfig(::DateTagger)
@@ -14,7 +14,7 @@ private val CONDITIONS = setOf(
     Condition.Ordered()
 )
 
-class DateTagger(document: Document) : RuleTagger(
+class DateTagger(document: Document) : AbstractConditionalTagger(
     document,
     KEY,
     KEYS,
