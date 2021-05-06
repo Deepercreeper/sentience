@@ -98,10 +98,12 @@ fun interface Condition {
 
     operator fun not() = Condition { slots -> !matches(slots) }
 
-    class Ordered(private vararg val keys: String) : Condition {
+    class Ordered(private val keys: List<String>) : Condition {
         init {
             require(keys.size > 1)
         }
+
+        constructor(vararg keys: String) : this(keys.toList())
 
         override fun matches(slots: Slots): Boolean {
             val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
@@ -113,46 +115,56 @@ fun interface Condition {
         override fun toString() = keys.joinToString(separator = " < ")
     }
 
-    class MaxInnerDistance(private val distance: Int, private vararg val keys: String) : Condition {
+    class MaxInnerDistance(private val distance: Int, keys: List<String>) : AbstractKeyCondition(keys) {
         init {
             require(distance > 0)
-            require(keys.size > 1)
         }
 
-        override fun matches(slots: Slots): Boolean {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-            if (slotTags.asSequence().flatten().maxOf { it.end } - slotTags.asSequence().flatten().minOf { it.start } < distance) return true
-            return slotTags.anyCombination { it.asSequence().sorted().zipWithNext().all { (left, right) -> left.end - right.start <= distance } }
-        }
+        constructor(distance: Int, vararg keys: String) : this(distance, keys.toList())
+
+        override fun matches(tags: List<Tag>) = tags.asSequence().sorted().zipWithNext().all { (left, right) -> left.end - right.start <= distance }
 
         override fun toString() = "$distance < ${keys.joinToString()} >"
     }
 
-    class MaxOuterDistance(private val distance: Int, private vararg val keys: String) : Condition {
+    class MaxOuterDistance(private val distance: Int, keys: List<String>) : AbstractKeyCondition(keys) {
         init {
             require(distance > 0)
-            require(keys.size > 1)
         }
 
-        override fun matches(slots: Slots): Boolean {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-            return slotTags.anyCombination { it.maxOf(Tag::end) - it.minOf(Tag::start) <= distance }
-        }
+        constructor(distance: Int, vararg keys: String) : this(distance, keys.toList())
+
+        override fun matches(tags: List<Tag>) = tags.maxOf { it.end } - tags.minOf { it.start } <= distance
 
         override fun toString() = "$distance > ${keys.joinToString()} <"
     }
 
-    class Disjoint(private vararg val keys: String) : Condition {
+    class Disjoint(keys: List<String>) : AbstractKeyCondition(keys) {
+        constructor(vararg keys: String) : this(keys.toList())
+
+        override fun matches(tags: List<Tag>) = tags.asSequence().sorted().zipWithNext().all { (left, right) -> left.end <= right.start }
+
+        override fun toString() = keys.joinToString(separator = " <> ")
+    }
+
+    abstract class AbstractKeyCondition(protected val keys: List<String>, minKeySize: Int = 2) : Condition {
         init {
-            require(keys.size > 1)
+            require(keys.size >= minKeySize)
         }
+
+        constructor(vararg keys: String, minKeySize: Int = 2) : this(keys.toList(), minKeySize)
 
         override fun matches(slots: Slots): Boolean {
             val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-            return slotTags.anyCombination { it.asSequence().sorted().zipWithNext().all { (left, right) -> left.end <= right.start } }
+            return slotTags.anyCombination { matches(it) }
         }
 
-        override fun toString() = keys.joinToString(separator = " <> ")
+        fun findAll(slots: Slots): Sequence<List<Tag>> {
+            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return emptySequence() }
+            return slotTags.findAll(this::matches)
+        }
+
+        protected abstract fun matches(tags: List<Tag>): Boolean
     }
 }
 
@@ -161,4 +173,11 @@ private fun <T> List<List<T>>.anyCombination(condition: (List<T>) -> Boolean): B
     if (size == 1) return first().any { condition(listOf(it)) }
     val next = subList(0, size - 1)
     return last().any { item -> next.anyCombination { condition(it + item) } }
+}
+
+private fun <T> List<List<T>>.findAll(condition: (List<T>) -> Boolean): Sequence<List<T>> {
+    if (isEmpty()) return if (condition(emptyList())) sequenceOf(emptyList()) else emptySequence()
+    if (size == 1) return first().asSequence().map { listOf(it) }.filter(condition)
+    val next = subList(0, size - 1)
+    return last().asSequence().flatMap { item -> next.findAll { condition(it + item) } }
 }

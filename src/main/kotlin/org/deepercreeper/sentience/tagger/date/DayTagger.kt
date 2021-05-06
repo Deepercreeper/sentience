@@ -1,28 +1,18 @@
 package org.deepercreeper.sentience.tagger.date
 
 import org.deepercreeper.sentience.document.Document
-import org.deepercreeper.sentience.entity.Relation
+import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
-import org.deepercreeper.sentience.tagger.Tagger
-import org.deepercreeper.sentience.tagger.word.WordTagger
-import java.text.DateFormatSymbols
-import java.util.*
+import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
 
-class DayTaggerConfig(private val relations: Set<Relation>) : SimpleTaggerConfig({ DayTagger(it, relations) })
+class DayTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DayTagger(it, symbolService) })
 
-class DayTagger(document: Document, relations: Set<Relation>) : Tagger(document) {
-    private val symbols = DateFormatSymbols.getInstance(Locale.ENGLISH)!!
+private val SUFFIXES = setOf("st", "nd", "rd", "th")
 
-    private val taggers = (0..6).map { createTagger(it, relations) }
+class DayTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Int>(document, KEY, symbolService) {
+    override fun mappings() = (0..9).asSequence().map { it.toString() }.map { it to it } + SUFFIXES.asSequence().map { it to "" }
 
-    private fun createTagger(day: Int, relations: Set<Relation>): Tagger {
-        val long = symbols.weekdays[day]
-        val short = long.take(3)
-        val veryShort = long.take(2)
-        return WordTagger(document, KEY, setOf(long, short, veryShort), relations, VALUE_KEY to day)
-    }
-
-    override fun init() = taggers.forEach { it.init(engine) }
+    override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 1..31 }
 
     companion object {
         const val KEY = "day"

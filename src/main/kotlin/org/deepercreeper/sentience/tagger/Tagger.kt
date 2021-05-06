@@ -51,8 +51,8 @@ abstract class Tagger(protected val document: Document) {
         registry.unregisterAll()
     }
 
-    companion object {
-        const val VALUE_KEY = "value"
+    object Key {
+        const val VALUE = "value"
     }
 }
 

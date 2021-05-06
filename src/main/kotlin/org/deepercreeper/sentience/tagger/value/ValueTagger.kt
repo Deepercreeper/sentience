@@ -26,7 +26,7 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
                 if (index + symbol.length > token.length) continue
                 if (!token.regionMatches(index, symbol, 0, symbol.length)) continue
                 if (index + symbol.length == token.length) {
-                    convert(number + representation)?.let { tags += Tag(key, tag.start, tag.length, VALUE_KEY to it) }
+                    convert(number + representation)?.let { tags += Tag(key, tag.start, tag.length, Key.VALUE to it) }
                     return
                 }
                 indices += index + symbol.length to number + representation
