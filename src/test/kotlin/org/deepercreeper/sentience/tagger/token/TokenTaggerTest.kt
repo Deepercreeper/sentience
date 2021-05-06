@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 
 
 class TokenTaggerTest {
-    private val document = Document("Here we have a few example tokens")
+    private val document = Document("Here we have a few exa.mple tokens")
 
     private val tokens = document.text.split(' ')
 
@@ -26,6 +26,7 @@ class TokenTaggerTest {
     @Test
     fun test() {
         engine.process()
+        engine.print()
         assertEquals(tokens.size, counter.count)
         assertEquals(tokens, engine.tags.tags.map { document[it] })
     }

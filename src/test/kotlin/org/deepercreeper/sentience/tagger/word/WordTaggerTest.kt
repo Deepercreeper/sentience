@@ -5,6 +5,7 @@ import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.entity.Symbol
 import org.deepercreeper.sentience.tagger.TaggerEngine
 import org.deepercreeper.sentience.tagger.token.TokenTaggerConfig
+import org.deepercreeper.sentience.util.MockUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -18,7 +19,9 @@ class WordTaggerTest {
         "a" to "d"
     ).map { (left, right) -> Relation(Symbol(left), Symbol(right)) }.toSet()
 
-    private val engine = TaggerEngine(document, TokenTaggerConfig(), WordTaggerConfig("word", setOf("lockbar"), relations))
+    private val service = MockUtil.symbolService(relations)
+
+    private val engine = TaggerEngine(document, TokenTaggerConfig(), WordTaggerConfig("word", setOf("lockbar"), emptyMap(), service))
 
     @Test
     fun test() {

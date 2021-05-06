@@ -3,9 +3,9 @@ package org.deepercreeper.sentience.tagger.value
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.entity.Symbol
+import org.deepercreeper.sentience.tagger.Tagger
 import org.deepercreeper.sentience.tagger.TaggerEngine
 import org.deepercreeper.sentience.tagger.token.TokenTaggerConfig
-import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
 import org.deepercreeper.sentience.util.MockUtil
 import org.deepercreeper.sentience.util.get
 import kotlin.test.Test
@@ -34,6 +34,6 @@ class NumberTaggerTest {
     @Test
     fun test() {
         engine.process()
-        assertEquals(setOf(1234.0, 120123.0, 45567.0), engine.tags[NumberTagger.KEY].asSequence().map { it.get<Double>(AbstractValueTagger.VALUE_KEY) }.toSet())
+        assertEquals(setOf(1234.0, 120123.0, 45567.0), engine.tags[NumberTagger.KEY].asSequence().map { it.get<Double>(Tagger.Key.VALUE) }.toSet())
     }
 }

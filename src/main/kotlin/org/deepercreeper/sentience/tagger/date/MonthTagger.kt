@@ -15,12 +15,12 @@ class MonthTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ Mon
 class MonthTagger(document: Document, symbolService: SymbolService) : Tagger(document) {
     private val symbols = DateFormatSymbols.getInstance(Locale.ENGLISH)!!
 
-    private val taggers = (1..12).map { createTagger(it, symbolService.relations) } + createNumberTagger(symbolService)
+    private val taggers = (1..12).map { createTagger(it, symbolService) } + createNumberTagger(symbolService)
 
-    private fun createTagger(month: Int, relations: Set<Relation>): Tagger {
+    private fun createTagger(month: Int, symbolService: SymbolService): Tagger {
         val long = symbols.months[month - 1]
         val short = long.take(3)
-        return WordTagger(document, KEY, setOf(long, short), relations, Key.VALUE to month)
+        return WordTagger(document, KEY, setOf(long, short), symbolService, Key.VALUE to month)
     }
 
     private fun createNumberTagger(symbolService: SymbolService) = object : AbstractValueTagger<Int>(document, KEY, symbolService) {

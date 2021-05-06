@@ -56,4 +56,22 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
             event = eventManager.poll()
         }
     }
+
+    fun print() {
+        val starts = tags.tags().map { it.start }.sorted().toMutableList()
+        val ends = tags.tags().map { it.end }.sorted().toMutableList()
+        var index = 0
+        val text = document.text
+        val result = StringBuilder()
+        while (starts.isNotEmpty() || ends.isNotEmpty()) {
+            val start = starts.firstOrNull() ?: text.length < ends.firstOrNull() ?: text.length
+            val next = if (start) starts.removeFirst() else ends.removeFirst()
+            val infix = if (start) "<" else ">"
+            if (next > index) result.append(text, index, next)
+            result.append(infix)
+            index = next
+        }
+        if (index < text.length) result.append(text, index, text.length)
+        println(result)
+    }
 }

@@ -4,13 +4,15 @@ import kotlin.reflect.KClass
 
 
 fun interface Listener<E : Event> : (E) -> Unit {
-    val priority: Int get() = 0
+//TODO    val prio: Int get() = 0
 }
 
 class TypeRegistry {
     private val listeners = mutableMapOf<KClass<out Event>, MutableList<out Listener<*>>>()
 
-    fun handle(event: Event) = get(event::class)?.asSequence()?.sortedByDescending { it.priority }?.forEach { it(event) } ?: Unit
+    fun handle(event: Event) = get(event::class)?.asSequence()
+//TODO        ?.sortedByDescending { it.prio }
+        ?.forEach { it(event) } ?: Unit
 
     fun register(registry: TypeRegistry) {
         listeners += registry.listeners
@@ -42,7 +44,9 @@ class TypeRegistry {
 class KeyRegistry<E : Event, K>(private val key: (E) -> K) {
     private val listeners = mutableMapOf<K, MutableList<Listener<E>>>()
 
-    fun handle(event: E) = listeners[key(event)]?.asSequence()?.sortedByDescending { it.priority }?.forEach { it(event) } ?: Unit
+    fun handle(event: E) = listeners[key(event)]?.asSequence()
+//TODO        ?.sortedByDescending { it.prio }
+        ?.forEach { it(event) } ?: Unit
 
     fun register(registry: KeyRegistry<E, K>) {
         listeners += registry.listeners
