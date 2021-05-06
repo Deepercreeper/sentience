@@ -9,8 +9,9 @@ class RuleTaggerConfig(
     var key: String,
     val dependencies: MutableSet<String>,
     val conditions: MutableSet<Condition>,
-    val targets: MutableSet<String>
-) : SimpleTaggerConfig({ AbstractConditionalTagger(it, key, dependencies.toSet(), conditions.toSet(), targets.toSet()) })
+    val targets: MutableSet<String>,
+    var distance: Int
+) : SimpleTaggerConfig({ RuleTagger(it, key, dependencies.toSet(), conditions.toSet(), targets.toSet(), distance) })
 
 typealias Slots = Map<String, List<Tag>>
 
@@ -50,6 +51,7 @@ class RuleTagger(
     override val dependencies: Set<String>,
     override val conditions: Set<Condition>,
     private val targets: Set<String>,
+    override val distance: Int,
     private val mapping: (Slots) -> Map<String, Any>
 ) : AbstractConditionalTagger(document) {
     init {
@@ -62,8 +64,9 @@ class RuleTagger(
         dependencies: Set<String>,
         conditions: Set<Condition>,
         targets: Set<String>,
+        distance: Int,
         mapping: Map<String, Any>
-    ) : this(document, key, dependencies, conditions, targets, { mapping })
+    ) : this(document, key, dependencies, conditions, targets, distance, { mapping })
 
     constructor(
         document: Document,
@@ -71,11 +74,11 @@ class RuleTagger(
         dependencies: Set<String>,
         conditions: Set<Condition>,
         targets: Set<String>,
+        distance: Int,
         vararg mappings: Pair<String, Any>
-    ) : this(document, key, dependencies, conditions, targets, mappings.toMap())
+    ) : this(document, key, dependencies, conditions, targets, distance, mappings.toMap())
 
     override fun tag(slots: Slots) {
-        //TODO Maybe allow multiple tags of one key
         val targets = targets.asSequence().map { slots[it] }.filterNotNull().filter { it.isNotEmpty() }.map { it.last() }.toSet()
         if (targets.isEmpty()) error("No target found")
         val start = targets.minOf { it.start }
@@ -110,22 +113,6 @@ fun interface Condition {
         override fun toString() = keys.joinToString(separator = " < ")
     }
 
-    @Deprecated
-    class MaxDistance(private val distance: Int, private vararg val keys: String, private val inner: Boolean = true) : Condition {
-        init {
-            require(distance > 0)
-            require(keys.size > 1)
-        }
-
-        override fun matches(slots: Slots): Boolean {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-            return if (inner) tags.asSequence().sorted().zipWithNext().all { (left, right) -> right.start - left.end <= distance }
-            else tags.maxOf { it.end } - tags.minOf { it.start } < distance
-        }
-
-        override fun toString() = if (inner) "$distance < ${keys.joinToString()} >" else "$distance > ${keys.joinToString()} <"
-    }
-
     class MaxInnerDistance(private val distance: Int, private vararg val keys: String) : Condition {
         init {
             require(distance > 0)
@@ -149,10 +136,7 @@ fun interface Condition {
 
         override fun matches(slots: Slots): Boolean {
             val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-
-            //TODO
-            if (slotTags.asSequence().flatten().maxOf { it.end } - slotTags.asSequence().flatten().minOf { it.start } < distance) return true
-            return slotTags.anyCombination { it.asSequence().sorted().zipWithNext().all { (left, right) -> left.end - right.start <= distance } }
+            return slotTags.anyCombination { it.maxOf(Tag::end) - it.minOf(Tag::start) <= distance }
         }
 
         override fun toString() = "$distance > ${keys.joinToString()} <"
@@ -164,8 +148,8 @@ fun interface Condition {
         }
 
         override fun matches(slots: Slots): Boolean {
-            val tags = keys.map { slots[it] ?: return false }
-            return tags.asSequence().sorted().zipWithNext().all { (left, right) -> left.end <= right.start }
+            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
+            return slotTags.anyCombination { it.asSequence().sorted().zipWithNext().all { (left, right) -> left.end <= right.start } }
         }
 
         override fun toString() = keys.joinToString(separator = " <> ")
