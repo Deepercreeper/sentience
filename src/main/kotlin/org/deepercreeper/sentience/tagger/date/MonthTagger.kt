@@ -24,6 +24,8 @@ class MonthTagger(document: Document, symbolService: SymbolService) : Tagger(doc
     }
 
     private fun createNumberTagger(symbolService: SymbolService) = object : AbstractValueTagger<Int>(document, KEY, symbolService) {
+        override val maxLength get() = 2
+
         override fun mappings() = (0..9).asSequence().map { "$it" }.map { it to it }
 
         override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 1..12 }

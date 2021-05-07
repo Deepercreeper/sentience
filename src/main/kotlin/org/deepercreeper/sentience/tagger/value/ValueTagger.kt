@@ -11,12 +11,15 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
         for ((symbol, representation) in mappings()) symbolService.groupOf(symbol).forEach { computeIfAbsent(it.first()) { mutableListOf() } += it to representation }
     }
 
+    protected open val maxLength get() = Int.MAX_VALUE
+
     override fun init() {
         //TODO Maybe not always tokens
         register(TokenTagger.KEY) { process(it) }
     }
 
     private fun process(tag: Tag) {
+        if (tag.length > maxLength) return
         val token = document[tag]
         val indices = mutableListOf(0 to "")
         while (indices.isNotEmpty()) {

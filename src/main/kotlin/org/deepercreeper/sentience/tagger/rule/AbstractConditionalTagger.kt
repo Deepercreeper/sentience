@@ -98,19 +98,10 @@ fun interface Condition {
 
     operator fun not() = Condition { slots -> !matches(slots) }
 
-    class Ordered(private val keys: List<String>) : Condition {
-        init {
-            require(keys.size > 1)
-        }
-
+    class Ordered(keys: List<String>) : AbstractKeyCondition(keys) {
         constructor(vararg keys: String) : this(keys.toList())
 
-        override fun matches(slots: Slots): Boolean {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
-            var index = slotTags.first().minOf { it.end }
-            for (tags in slotTags.drop(1)) index = tags.asSequence().filter { it.start >= index }.minOfOrNull { it.end } ?: return false
-            return true
-        }
+        override fun matches(tags: List<Tag>) = tags.asSequence().zipWithNext().all { (left, right) -> left.end <= right.start }
 
         override fun toString() = keys.joinToString(separator = " < ")
     }
