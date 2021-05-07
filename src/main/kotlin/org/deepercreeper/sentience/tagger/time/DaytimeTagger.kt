@@ -6,22 +6,22 @@ import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
 
 
-class DayTimeTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DayTimeTagger(it, symbolService) })
+class DaytimeTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DaytimeTagger(it, symbolService) })
 
-class DayTimeTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<DayTime>(document, KEY, symbolService) {
+class DaytimeTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Daytime>(document, KEY, symbolService) {
     override val maxLength get() = 5
 
     override fun mappings() = sequenceOf("a", "p", "m").map { it to it } + sequenceOf("." to "")
 
-    override fun convert(text: String) = DayTime.of(text)
+    override fun convert(text: String) = Daytime.of(text)
 
     companion object {
-        const val KEY = "dayTime"
+        const val KEY = "daytime"
     }
 
 }
 
-enum class DayTime(private val text: String) {
+enum class Daytime(private val text: String) {
     AM("am") {
         override fun map(hour: Int) = when (hour) {
             12 -> 0

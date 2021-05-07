@@ -11,16 +11,16 @@ import org.deepercreeper.sentience.util.get
 
 class TimeTaggerConfig : SimpleTaggerConfig(::TimeTagger)
 
-private val KEYS = setOf(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DayTimeTagger.KEY)
+private val KEYS = setOf(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DaytimeTagger.KEY)
 
 private val CONDITION = TimeFormat.values().asSequence().map { it.condition }.reduce(Condition::or)
 
 private enum class TimeFormat(vararg keys: String) {
-    HOUR_MINUTE_SECOND_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DayTimeTagger.KEY) {
+    HOUR_MINUTE_SECOND_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DaytimeTagger.KEY) {
         override fun parseTag(tags: List<Tag>): Int {
-            val (hourTag, minuteTag, secondTag, dayTimeTag) = tags
-            val dayTime: DayTime = dayTimeTag[Tagger.Key.VALUE]!!
-            val hour: Int = dayTime.map(hourTag[Tagger.Key.VALUE]!!)
+            val (hourTag, minuteTag, secondTag, daytimeTag) = tags
+            val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
+            val hour: Int = daytime.map(hourTag[Tagger.Key.VALUE]!!)
             val minute: Int = minuteTag[Tagger.Key.VALUE]!!
             val second: Int = secondTag[Tagger.Key.VALUE]!!
             return ((hour * 60 + minute) * 60 + second) * 1000
@@ -37,11 +37,11 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_MINUTE_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, DayTimeTagger.KEY) {
+    HOUR_MINUTE_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, DaytimeTagger.KEY) {
         override fun parseTag(tags: List<Tag>): Int {
-            val (hourTag, minuteTag, dayTimeTag) = tags
-            val dayTime: DayTime = dayTimeTag[Tagger.Key.VALUE]!!
-            val hour: Int = dayTime.map(hourTag[Tagger.Key.VALUE]!!)
+            val (hourTag, minuteTag, daytimeTag) = tags
+            val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
+            val hour: Int = daytime.map(hourTag[Tagger.Key.VALUE]!!)
             val minute: Int = minuteTag[Tagger.Key.VALUE]!!
             return (hour * 60 + minute) * 60 * 1000
         }
@@ -56,11 +56,11 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_DAYTIME(HourTagger.KEY, DayTimeTagger.KEY) {
+    HOUR_DAYTIME(HourTagger.KEY, DaytimeTagger.KEY) {
         override fun parseTag(tags: List<Tag>): Int {
-            val (hourTag, dayTimeTag) = tags
-            val dayTime: DayTime = dayTimeTag[Tagger.Key.VALUE]!!
-            val hour: Int = dayTime.map(hourTag[Tagger.Key.VALUE]!!)
+            val (hourTag, daytimeTag) = tags
+            val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
+            val hour: Int = daytime.map(hourTag[Tagger.Key.VALUE]!!)
             return hour * 60 * 60 * 1000
         }
     };
