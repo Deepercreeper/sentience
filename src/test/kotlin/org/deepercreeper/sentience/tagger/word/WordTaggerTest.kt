@@ -26,6 +26,7 @@ class WordTaggerTest {
     @Test
     fun test() {
         engine.process()
+        engine.print()
         assertEquals(10, engine.tags["word"].size)
     }
 }

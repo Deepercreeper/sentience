@@ -34,6 +34,7 @@ class NumberTaggerTest {
     @Test
     fun test() {
         engine.process()
+        engine.print()
         assertEquals(setOf(1234.0, 120123.0, 45567.0), engine.tags[NumberTagger.KEY].asSequence().map { it.get<Double>(Tagger.Key.VALUE) }.toSet())
     }
 }
