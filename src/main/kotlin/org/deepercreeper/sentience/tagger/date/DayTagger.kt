@@ -10,9 +10,9 @@ class DayTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DayTa
 private val SUFFIXES = setOf("st", "nd", "rd", "th")
 
 class DayTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Int>(document, KEY, symbolService) {
-    override fun mappings() = (0..9).asSequence().map { it.toString() }.map { it to it } + SUFFIXES.asSequence().map { it to "" }
+    override fun mappings() = (0..9).asSequence().map { it.toString() }.map { it to it } + SUFFIXES.asSequence().map { it to "$" }
 
-    override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 1..31 }
+    override fun convert(text: String) = text.takeIf { it.matches(Regex("^(\\d{1,2})\\$?$")) }?.replace("$", "")?.toInt()?.takeIf { it in 1..31 }
 
     companion object {
         const val KEY = "day"
