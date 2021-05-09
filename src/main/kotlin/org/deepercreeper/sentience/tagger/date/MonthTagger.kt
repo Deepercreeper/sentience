@@ -18,7 +18,7 @@ class MonthTagger(document: Document, symbolService: SymbolService) : Tagger(doc
     private val taggers = (1..12).map { createTagger(it, symbolService) } + createNumberTagger(symbolService)
 
     private fun createTagger(month: Int, symbolService: SymbolService): Tagger {
-        val long = symbols.months[month - 1]
+        val long = symbols.months[month - 1].lowercase()
         val short = long.take(3)
         return WordTagger(document, KEY, setOf(long, short), symbolService, Key.VALUE to month)
     }

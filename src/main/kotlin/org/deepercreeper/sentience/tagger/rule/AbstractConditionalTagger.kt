@@ -170,5 +170,5 @@ private fun <T> List<List<T>>.findAll(condition: (List<T>) -> Boolean): Sequence
     if (isEmpty()) return if (condition(emptyList())) sequenceOf(emptyList()) else emptySequence()
     if (size == 1) return first().asSequence().map { listOf(it) }.filter(condition)
     val next = subList(0, size - 1)
-    return last().asSequence().flatMap { item -> next.findAll { condition(it + item) } }
+    return last().asSequence().flatMap { item -> next.findAll { condition(it + item) }.map { it + item } }
 }

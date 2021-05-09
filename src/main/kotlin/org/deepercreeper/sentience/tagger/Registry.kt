@@ -15,7 +15,7 @@ class TypeRegistry {
         ?.forEach { it(event) } ?: Unit
 
     fun register(registry: TypeRegistry) {
-        listeners += registry.listeners
+        registry.listeners.keys.forEach { type -> addAll(type, registry.get(type)!!) }
     }
 
     fun <E : Event> register(type: KClass<E>, listener: Listener<E>) {
@@ -35,6 +35,10 @@ class TypeRegistry {
 
     fun unregisterAll() = listeners.clear()
 
+    private fun <E : Event> addAll(type: KClass<out E>, listeners: List<Listener<E>>) {
+        get(type) ?: mutableListOf<Listener<E>>().also { this.listeners[type] = it } += listeners
+    }
+
     private fun <E : Event> get(type: KClass<out E>): MutableList<Listener<E>>? {
         @Suppress("UNCHECKED_CAST")
         return listeners[type] as MutableList<Listener<E>>?
@@ -49,7 +53,7 @@ class KeyRegistry<E : Event, K>(private val key: (E) -> K) {
         ?.forEach { it(event) } ?: Unit
 
     fun register(registry: KeyRegistry<E, K>) {
-        listeners += registry.listeners
+        registry.listeners.forEach { (key, listeners) -> this.listeners.computeIfAbsent(key) { mutableListOf() } += listeners }
     }
 
     fun register(key: K, listener: Listener<E>) {

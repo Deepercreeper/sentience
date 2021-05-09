@@ -50,11 +50,7 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
     }
 
     private fun processEvents() {
-        var event = eventManager.poll()
-        while (event != null) {
-            registry.handle(event)
-            event = eventManager.poll()
-        }
+        while (true) registry.handle(eventManager.poll() ?: return)
     }
 
     fun print() {
