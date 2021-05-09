@@ -15,6 +15,7 @@ private val KEYS = setOf(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, Day
 
 private val CONDITION = TimeFormat.values().asSequence().map { it.condition }.reduce(Condition::or)
 
+//TODO This is tagging to many different interpretations of one time. Use one value tagger instead
 private enum class TimeFormat(vararg keys: String) {
     HOUR_MINUTE_SECOND_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DaytimeTagger.KEY) {
         override fun parseTag(tags: List<Tag>): Int {

@@ -38,10 +38,7 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document) 
     protected abstract fun tag(slots: Slots)
 
     private fun update() {
-        if (conditions.all { it.matches(slots) }) {
-            tag(slots)
-            slots.values.forEach { it.clear() }
-        }
+        if (conditions.all { it.matches(slots) }) tag(slots)
     }
 }
 
