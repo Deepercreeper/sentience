@@ -13,42 +13,45 @@ class Node private constructor(private val depth: Double, private val ignoreCase
     private val min: Int by lazy { (nodes.values.asSequence().flatten().map { it.min }.minOrNull() ?: -1) + 1 }
 
     private constructor(text: String, depth: Double = 0.0, ignoreCase: Boolean = false) : this(depth, ignoreCase) {
-        if (text.isNotEmpty()) nodes[text.first()] = mutableSetOf(Node(text.drop(1), depth + 1, ignoreCase))
+        if (text.isEmpty()) return
+        val first = if(ignoreCase) text.first().lowercaseChar() else text.first()
+        nodes[first] = mutableSetOf(Node(text.drop(1), depth + 1, ignoreCase))
     }
 
     fun matches(text: String) = text.length in min..max && matchesRecursive(text)
 
-    //TODO Implement case insensitivity
     private fun matchesRecursive(text: String): Boolean {
         if (terminal) return text.isEmpty()
         if (text.isEmpty()) return false
         val next = text.drop(1)
-        return nodes[text.first()]?.any { it.matchesRecursive(next) } ?: false
+        val first = if (ignoreCase) text.first().lowercaseChar() else text.first()
+        return nodes[first]?.any { it.matchesRecursive(next) } ?: false
     }
 
-    private fun relate(text: String, alt: String) = get(text).map { relate(alt, it) }.any { it }
+    private fun relate(text: String, alt: String) = this[text].map { relate(alt, it) }.any { it }
 
     private fun relate(text: String, target: Node): Boolean {
         var nodes = setOf(this)
         var index = 0
-        while (index < text.lastIndex) {
-            val char = text[index]
+        val casedText = if(ignoreCase) text.lowercase() else text
+        while (index < casedText.lastIndex) {
+            val char = casedText[index]
             nodes = nodes.asSequence().flatMap { it[char] }.filter { it.depth < target.depth }.toSet().takeIf { it.isNotEmpty() } ?: break
             index++
         }
-        if (index == text.lastIndex) {
-            val lastChar = text.last()
-            if (target in nodes.asSequence().flatMap { it[lastChar] }.toSet()) return false
-            return nodes.first().add(lastChar, target)
+        if (index == casedText.lastIndex) {
+            val last = casedText.last()
+            if (target in nodes.asSequence().flatMap { it[last] }.toSet()) return false
+            return nodes.first().add(last, target)
         }
         var node = nodes.first()
-        val depthStep = (target.depth - node.depth) / (text.length - index)
-        while (index < text.lastIndex) {
-            val char = text[index]
+        val depthStep = (target.depth - node.depth) / (casedText.length - index)
+        while (index < casedText.lastIndex) {
+            val char = casedText[index]
             node = Node(node.depth + depthStep).also { node.add(char, it) }
             index++
         }
-        node.add(text.last(), target)
+        node.add(casedText.last(), target)
         return true
     }
 
@@ -59,13 +62,15 @@ class Node private constructor(private val depth: Double, private val ignoreCase
     private operator fun get(text: String): Set<Node> {
         if (text.isEmpty()) return setOf(this)
         val next = text.drop(1)
-        return nodes[text.first()]?.asSequence()?.flatMap { it[next] }?.toSet() ?: emptySet()
+        val first = if (ignoreCase) text.first().lowercaseChar() else text.first()
+        return nodes[first]?.asSequence()?.flatMap { it[next] }?.toSet() ?: emptySet()
     }
 
     private operator fun contains(text: String): Boolean {
         if (text.isEmpty()) return true
         val next = text.drop(1)
-        return nodes[text.first()]?.any { next in it } ?: false
+        val first = if(ignoreCase) text.first().lowercaseChar() else text.first()
+        return nodes[first]?.any { next in it } ?: false
     }
 
     private fun forEach(operation: (Node) -> Unit) {
