@@ -5,7 +5,6 @@ import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.rule.AbstractConditionalTagger
 import org.deepercreeper.sentience.tagger.rule.Condition
-import org.deepercreeper.sentience.tagger.rule.Slots
 import org.deepercreeper.sentience.util.get
 import java.time.LocalDate
 
@@ -22,7 +21,7 @@ class DateTagger(document: Document) : AbstractConditionalTagger(document) {
 
     override val distance get() = 25
 
-    override fun tag(slots: Slots) = CONDITION.findAll(slots).map { it.associateBy(Tag::key) }.forEach { tags ->
+    override fun tag() = CONDITION.findAll(this).map { it.associateBy(Tag::key) }.forEach { tags ->
         val day: Int = tags[DayTagger.KEY]!![Key.VALUE]!!
         val month: Int = tags[MonthTagger.KEY]!![Key.VALUE]!!
         val year: Int = tags[YearTagger.KEY]!![Key.VALUE]!!

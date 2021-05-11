@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.Tagger
+import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 class RuleTaggerConfig(
     var key: String,
@@ -15,19 +16,28 @@ class RuleTaggerConfig(
 
 typealias Slots = Map<String, List<Tag>>
 
-abstract class AbstractConditionalTagger(document: Document) : Tagger(document) {
+interface HasSlots {
+    val distance: Int
+
+    val index: Int
+
+    operator fun get(key: String): List<Tag>
+}
+
+abstract class AbstractConditionalTagger(document: Document) : Tagger(document), HasSlots {
     private val slots = mutableMapOf<String, MutableList<Tag>>()
 
     protected abstract val dependencies: Set<String>
 
     protected abstract val conditions: Set<Condition>
 
-    protected abstract val distance: Int
+    final override var index = 0
+        private set
 
     override fun init() {
+        register(TokenTagger.KEY, this::token)
         dependencies.forEach { key ->
             register(key) { tag ->
-                slots.values.forEach { tags -> tags.removeIf { tag.start - it.end > distance } }
                 slots.computeIfAbsent(tag.key) { mutableListOf() } += tag
                 update()
             }
@@ -35,11 +45,19 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document) 
         //TODO Add listener for ShutdownEvent that allows to react to the document ending
     }
 
-    protected abstract fun tag(slots: Slots)
+    override fun get(key: String) = slots[key] ?: emptyList()
+
+    private fun token(tag: Tag) {
+        slots.values.forEach { slot -> slot.removeIf { tag.start - it.end > distance } }
+        index = tag.start
+        update()
+    }
 
     private fun update() {
-        if (conditions.all { it.matches(slots) }) tag(slots)
+        if (conditions.all { it.matches(this) }) tag()
     }
+
+    protected abstract fun tag()
 }
 
 class RuleTagger(
@@ -49,7 +67,7 @@ class RuleTagger(
     override val conditions: Set<Condition>,
     private val targets: Set<String>,
     override val distance: Int,
-    private val mapping: (Slots) -> Map<String, Any>
+    private val mapping: (HasSlots) -> Map<String, Any>
 ) : AbstractConditionalTagger(document) {
     init {
         require(dependencies.containsAll(targets))
@@ -75,25 +93,25 @@ class RuleTagger(
         vararg mappings: Pair<String, Any>
     ) : this(document, key, dependencies, conditions, targets, distance, mappings.toMap())
 
-    override fun tag(slots: Slots) {
-        val targets = targets.asSequence().map { slots[it] }.filterNotNull().filter { it.isNotEmpty() }.map { it.last() }.toSet()
+    override fun tag() {
+        val targets = targets.asSequence().map { this[it] }.filterNotNull().filter { it.isNotEmpty() }.map { it.last() }.toSet()
         if (targets.isEmpty()) error("No target found")
         val start = targets.minOf { it.start }
         val end = targets.maxOf { it.end }
-        tags += Tag(key, start, end - start, mapping(slots))
+        tags += Tag(key, start, end - start, mapping(this))
     }
 }
 
 fun interface Condition {
-    fun matches(slots: Slots): Boolean
+    fun matches(slots: HasSlots): Boolean
 
-    infix fun and(condition: Condition) = Condition { slots -> matches(slots) && condition.matches(slots) }
+    infix fun and(condition: Condition) = and(this, condition)
 
-    infix fun or(condition: Condition) = Condition { slots -> matches(slots) || condition.matches(slots) }
+    infix fun or(condition: Condition) = or(this, condition)
 
-    infix fun xor(condition: Condition) = Condition { slots -> matches(slots) xor condition.matches(slots) }
+    infix fun xor(condition: Condition) = xor(this, condition)
 
-    operator fun not() = Condition { slots -> !matches(slots) }
+    operator fun not() = not(this)
 
     class Ordered(keys: List<String>) : AbstractKeyCondition(keys) {
         constructor(vararg keys: String) : this(keys.toList())
@@ -142,17 +160,55 @@ fun interface Condition {
 
         constructor(vararg keys: String, minKeySize: Int = 2) : this(keys.toList(), minKeySize)
 
-        override fun matches(slots: Slots): Boolean {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return false }
+        override fun matches(slots: HasSlots): Boolean {
+            val slotTags = keys.map { key -> slots[key].takeIf { it.isNotEmpty() } ?: return false }
             return slotTags.anyCombination { matches(it) }
         }
 
-        fun findAll(slots: Slots): Sequence<List<Tag>> {
-            val slotTags = keys.map { key -> slots[key]?.takeIf { it.isNotEmpty() } ?: return emptySequence() }
+        fun findAll(slots: HasSlots): Sequence<List<Tag>> {
+            val slotTags = keys.map { key -> slots[key].takeIf { it.isNotEmpty() } ?: return emptySequence() }
             return slotTags.findAll(this::matches)
         }
 
         protected abstract fun matches(tags: List<Tag>): Boolean
+    }
+
+    companion object {
+        fun and(vararg conditions: Condition) = object : Condition {
+            init {
+                require(conditions.size > 1)
+            }
+
+            override fun matches(slots: HasSlots) = conditions.all { it.matches(slots) }
+
+            override fun toString() = conditions.joinToString(separator = " and ") { "($it)" }
+        }
+
+        fun or(vararg conditions: Condition) = object : Condition {
+            init {
+                require(conditions.size > 1)
+            }
+
+            override fun matches(slots: HasSlots) = conditions.any { it.matches(slots) }
+
+            override fun toString() = conditions.joinToString(separator = " or ") { "($it)" }
+        }
+
+        fun xor(vararg conditions: Condition) = object : Condition {
+            init {
+                require(conditions.size > 1)
+            }
+
+            override fun matches(slots: HasSlots) = conditions.count { it.matches(slots) } % 2 == 1
+
+            override fun toString() = conditions.joinToString(separator = " xor ") { "($it)" }
+        }
+
+        fun not(condition: Condition) = object : Condition {
+            override fun matches(slots: HasSlots) = !condition.matches(slots)
+
+            override fun toString() = "not ($condition)"
+        }
     }
 }
 

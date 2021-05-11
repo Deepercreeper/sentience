@@ -16,8 +16,10 @@ private val KEYS = setOf(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, Day
 private val CONDITION = TimeFormat.values().asSequence().map { it.condition }.reduce(Condition::or)
 
 //TODO This is tagging to many different interpretations of one time. Use one value tagger instead
-private enum class TimeFormat(vararg keys: String) {
-    HOUR_MINUTE_SECOND_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DaytimeTagger.KEY) {
+private enum class TimeFormat {
+    HOUR_MINUTE_SECOND_DAYTIME {
+        override val condition = Condition.Ordered(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY, DaytimeTagger.KEY)
+
         override fun parseTag(tags: List<Tag>): Int {
             val (hourTag, minuteTag, secondTag, daytimeTag) = tags
             val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
@@ -28,7 +30,9 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_MINUTE_SECOND(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY) {
+    HOUR_MINUTE_SECOND {
+        override val condition = Condition.Ordered(HourTagger.KEY, MinuteTagger.KEY, SecondTagger.KEY)
+
         override fun parseTag(tags: List<Tag>): Int {
             val (hourTag, minuteTag, secondTag) = tags
             val hour: Int = hourTag[Tagger.Key.VALUE]!!
@@ -38,7 +42,9 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_MINUTE_DAYTIME(HourTagger.KEY, MinuteTagger.KEY, DaytimeTagger.KEY) {
+    HOUR_MINUTE_DAYTIME {
+        override val condition = Condition.Ordered(HourTagger.KEY, MinuteTagger.KEY, DaytimeTagger.KEY)
+
         override fun parseTag(tags: List<Tag>): Int {
             val (hourTag, minuteTag, daytimeTag) = tags
             val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
@@ -48,7 +54,9 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_MINUTE(HourTagger.KEY, MinuteTagger.KEY) {
+    HOUR_MINUTE {
+        override val condition = Condition.Ordered(HourTagger.KEY, MinuteTagger.KEY)
+
         override fun parseTag(tags: List<Tag>): Int {
             val (hourTag, minuteTag) = tags
             val hour: Int = hourTag[Tagger.Key.VALUE]!!
@@ -57,7 +65,9 @@ private enum class TimeFormat(vararg keys: String) {
         }
     },
 
-    HOUR_DAYTIME(HourTagger.KEY, DaytimeTagger.KEY) {
+    HOUR_DAYTIME {
+        override val condition = Condition.Ordered(HourTagger.KEY, DaytimeTagger.KEY)
+
         override fun parseTag(tags: List<Tag>): Int {
             val (hourTag, daytimeTag) = tags
             val daytime: Daytime = daytimeTag[Tagger.Key.VALUE]!!
@@ -66,7 +76,7 @@ private enum class TimeFormat(vararg keys: String) {
         }
     };
 
-    val condition = Condition.Ordered(*keys)
+    abstract val condition: Condition
 
     fun parseTags(slots: Slots) = condition.findAll(slots).map { Triple(parseTag(it), it.first().start, it.last().end) }
 
