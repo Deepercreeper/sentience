@@ -2,6 +2,7 @@ package org.deepercreeper.sentience.tagger.token
 
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.*
+import org.deepercreeper.sentience.util.get
 
 
 class TokenTaggerConfig : SimpleTaggerConfig(::TokenTagger)
@@ -12,13 +13,13 @@ class TokenTagger(document: Document) : Tagger(document) {
     private fun process() = document.text.forEachToken(Char::isWhitespace, this::addToken)
 
     private fun addToken(index: Int, length: Int) {
-        tags += Tag(KEY, index, length, type = Tag.Type.TOKEN)
+        tags += Tag(KEY, index, length, SUBTOKEN to false, type = Tag.Type.TOKEN)
         val token = document.text.substring(index, index + length)
         token.forEachToken({ !isLetterOrDigit() }) { tokenIndex, tokenLength -> addSubToken(token, index + tokenIndex, tokenLength) }
     }
 
     private fun addSubToken(token: String, index: Int, length: Int) {
-        if (length < token.length) tags += Tag(KEY, index, length, type = Tag.Type.TOKEN)
+        if (length < token.length) tags += Tag(KEY, index, length, SUBTOKEN to true, type = Tag.Type.TOKEN)
     }
 
     private fun String.forEachToken(isSeparator: Char.() -> Boolean, operation: (Int, Int) -> Unit) {
@@ -37,5 +38,9 @@ class TokenTagger(document: Document) : Tagger(document) {
 
     companion object {
         const val KEY = "token"
+
+        const val SUBTOKEN = "subtoken"
     }
 }
+
+val Tag.isSubtoken get() = key == TokenTagger.KEY && get(TokenTagger.SUBTOKEN)!!

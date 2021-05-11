@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.document.HasTags
 import org.deepercreeper.sentience.document.TagManager
 import org.deepercreeper.sentience.tagger.token.TokenTagger
+import org.deepercreeper.sentience.util.get
 import org.deepercreeper.sentience.util.logger
 
 
@@ -67,7 +68,7 @@ class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) 
                 TokenTagger.KEY -> if (tokens) {
                     if (start) "<" else ">"
                 } else ""
-                else -> if (start) "[" else "|${tag.key}]"
+                else -> if (start) "[" else (tag.get<Any>(Tagger.Key.VALUE)?.let { "|${tag.key}:$it]" } ?: "|${tag.key}]")
             }
             if (next > index) result.append(text, index, next)
             result.append(infix)

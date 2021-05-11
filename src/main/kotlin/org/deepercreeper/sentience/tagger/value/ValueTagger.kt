@@ -19,7 +19,7 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
     }
 
     private fun process(tag: Tag) {
-        if (tag.length > maxLength) return
+        if (tag.length > maxLength || !validate(tag)) return
         val token = document[tag]
         val indices = mutableListOf(0 to "")
         while (indices.isNotEmpty()) {
@@ -36,6 +36,8 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
             }
         }
     }
+
+    protected open fun validate(tag: Tag) = true
 
     protected abstract fun mappings(): Sequence<Pair<String, String>>
 
