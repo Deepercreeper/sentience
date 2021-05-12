@@ -2,6 +2,7 @@ package org.deepercreeper.sentience.tagger.rule
 
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.*
+import org.deepercreeper.sentience.tagger.token.SubTokenTagger
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 class RuleTaggerConfig(
@@ -33,10 +34,10 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document),
         private set
 
     override fun init() {
-        register(TokenTagger.KEY) { token(it) }
+        register(TokenTagger.KEY, SubTokenTagger.KEY) { updateIndex(it.start) }
         dependencies.forEach { key ->
-            register(key) { tag ->
-                slots.computeIfAbsent(tag.key) { mutableListOf() } += tag
+            register(key) {
+                slots.computeIfAbsent(it.key) { mutableListOf() } += it
                 update()
             }
         }
@@ -45,9 +46,8 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document),
 
     override fun get(key: String) = slots[key] ?: emptyList()
 
-    private fun token(tag: Tag) = updateIndex(tag.start)
-
     private fun updateIndex(index: Int) {
+        if (index <= this.index) return
         this.index = index
         update()
         slots.values.forEach { slot -> slot.removeIf { index - it.end > distance } }
