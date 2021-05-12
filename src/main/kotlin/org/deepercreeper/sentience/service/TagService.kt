@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class TagService {
-    fun tag(document: Document) = TaggerEngine(document, emptyList()).apply { process() }.tags.tags
+class TagService(private val taggerService: TaggerService) {
+    fun tag(document: Document) = TaggerEngine(document, taggerService.configs).apply { process() }.tags.tags
 }

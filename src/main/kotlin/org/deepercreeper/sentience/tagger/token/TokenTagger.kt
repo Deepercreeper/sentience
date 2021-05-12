@@ -13,6 +13,8 @@ class TokenTagger(document: Document) : Tagger(document) {
 
     companion object {
         const val KEY = "token"
+
+        fun configs() = listOf(TokenTaggerConfig())
     }
 }
 
@@ -30,6 +32,8 @@ class SubTokenTagger(document: Document) : Tagger(document) {
 
     companion object {
         const val KEY = "subToken"
+
+        fun configs() = listOf(SubTokenTaggerConfig())
     }
 }
 

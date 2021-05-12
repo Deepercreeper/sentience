@@ -1,6 +1,7 @@
 package org.deepercreeper.sentience.tagger.date
 
 import org.deepercreeper.sentience.document.Document
+import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.rule.AbstractConditionalTagger
@@ -33,5 +34,7 @@ class DateTagger(document: Document) : AbstractConditionalTagger(document) {
 
     companion object {
         const val KEY = "date"
+
+        fun configs(symbolService: SymbolService) = listOf(DayTaggerConfig(symbolService), MonthTaggerConfig(symbolService), YearTaggerConfig(symbolService), DateTaggerConfig())
     }
 }

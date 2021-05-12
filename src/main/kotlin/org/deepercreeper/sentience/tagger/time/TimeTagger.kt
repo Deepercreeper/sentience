@@ -1,6 +1,7 @@
 package org.deepercreeper.sentience.tagger.time
 
 import org.deepercreeper.sentience.document.Document
+import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.rule.AbstractConditionalTagger
@@ -57,5 +58,7 @@ class TimeTagger(document: Document) : AbstractConditionalTagger(document) {
 
     companion object {
         const val KEY = "time"
+
+        fun configs(symbolService: SymbolService) = listOf(RawTimeTaggerConfig(symbolService), DaytimeTaggerConfig(symbolService), TimeTaggerConfig())
     }
 }

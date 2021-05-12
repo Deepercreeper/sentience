@@ -15,5 +15,7 @@ class NumberTagger(document: Document, symbolService: SymbolService) : AbstractV
 
     companion object {
         const val KEY = "number"
+
+        fun configs(symbolService: SymbolService) = listOf(NumberTaggerConfig(symbolService))
     }
 }
