@@ -35,7 +35,7 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document),
         private set
 
     override fun init() {
-        register(TokenTagger.KEY, this::token)
+        register(TokenTagger.KEY) { token(it) }
         dependencies.forEach { key ->
             register(key) { tag ->
                 slots.computeIfAbsent(tag.key) { mutableListOf() } += tag
@@ -128,7 +128,7 @@ fun interface Condition {
 
         constructor(distance: Int, vararg keys: String) : this(distance, keys.toList())
 
-        override fun matches(tags: List<Tag>) = tags.asSequence().sorted().zipWithNext().all { (left, right) -> left.end - right.start <= distance }
+        override fun matches(tags: List<Tag>) = tags.asSequence().sorted().zipWithNext().all { (left, right) -> right.start - left.end <= distance }
 
         override fun toString() = "$distance < ${keys.joinToString()} >"
     }

@@ -31,8 +31,8 @@ enum class Daytime(private val text: String) {
 
     PM("pm") {
         override fun map(hour: Int) = when (hour) {
-            12 -> 12
-            else -> hour + 12
+            in 1..11 -> hour + 12
+            else -> hour
         }
     };
 

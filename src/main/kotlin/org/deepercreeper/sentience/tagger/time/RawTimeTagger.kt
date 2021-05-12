@@ -3,17 +3,16 @@ package org.deepercreeper.sentience.tagger.time
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
-import org.deepercreeper.sentience.tagger.Tag
-import org.deepercreeper.sentience.tagger.token.isSubtoken
+import org.deepercreeper.sentience.tagger.token.TokenTagger
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
 
 
 class RawTimeTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ RawTimeTagger(it, symbolService) })
 
 class RawTimeTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<List<Int>>(document, KEY, symbolService) {
-    override val maxLength get() = 10
+    override val keys get() = setOf(TokenTagger.KEY)
 
-    override fun validate(tag: Tag) = !tag.isSubtoken
+    override val maxLength get() = 10
 
     override fun mappings() = (0..9).asSequence().map { "$it" }.map { it to it } + (":" to ":") + sequenceOf(".", ",").map { it to "" }
 

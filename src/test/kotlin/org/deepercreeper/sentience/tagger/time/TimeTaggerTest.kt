@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 
 class TimeTaggerTest {
-    private val document = Document("Right now it's pm 12:15:21 am and we are going to tag the time")
+    private val document = Document("Right now it's 12:15:21 am and we are going to tag the time 17:14. Also at 3 pm we have another example.")
 
     private val service = MockUtil.symbolService()
 

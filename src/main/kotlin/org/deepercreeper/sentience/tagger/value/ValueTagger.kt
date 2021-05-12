@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.Tag
 import org.deepercreeper.sentience.tagger.Tagger
+import org.deepercreeper.sentience.tagger.token.SubTokenTagger
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 abstract class AbstractValueTagger<T : Any>(document: Document, private val key: String, symbolService: SymbolService) : Tagger(document) {
@@ -11,15 +12,14 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
         for ((symbol, representation) in mappings()) symbolService.groupOf(symbol).forEach { computeIfAbsent(it.first()) { mutableListOf() } += it to representation }
     }
 
+    protected open val keys get() = setOf(TokenTagger.KEY, SubTokenTagger.KEY)
+
     protected open val maxLength get() = Int.MAX_VALUE
 
-    override fun init() {
-        //TODO Maybe not always tokens
-        register(TokenTagger.KEY) { process(it) }
-    }
+    override fun init() = register(keys) { process(it) }
 
     private fun process(tag: Tag) {
-        if (tag.length > maxLength || !validate(tag)) return
+        if (tag.length > maxLength) return
         val token = document[tag]
         val indices = mutableListOf(0 to "")
         while (indices.isNotEmpty()) {
@@ -36,8 +36,6 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
             }
         }
     }
-
-    protected open fun validate(tag: Tag) = true
 
     protected abstract fun mappings(): Sequence<Pair<String, String>>
 

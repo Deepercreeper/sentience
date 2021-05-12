@@ -34,7 +34,9 @@ abstract class Tagger(protected val document: Document) {
 
     fun fire(event: Event) = engine.fire(event)
 
-    fun register(key: String, listener: Listener<Tag>) = tagRegistry.register(key, listener)
+    fun register(keys: Iterable<String>, listener: Listener<Tag>) = keys.forEach { tagRegistry.register(it, listener) }
+
+    fun register(vararg keys: String, listener: Listener<Tag>) = keys.forEach { tagRegistry.register(it, listener) }
 
     fun unregister(key: String, listener: Listener<Tag>) = tagRegistry.unregister(key, listener)
 

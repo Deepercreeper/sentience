@@ -41,7 +41,7 @@ class WordTagger(
         vararg mappings: Pair<String, Any>
     ) : this(document, key, words, mappings.toMap(), symbolService)
 
-    override fun init() = register(TokenTagger.KEY, this::process)
+    override fun init() = register(TokenTagger.KEY) { process(it) }
 
     private fun process(tag: Tag) {
         val token = document[tag]
