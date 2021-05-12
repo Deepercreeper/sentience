@@ -1,9 +1,7 @@
 package org.deepercreeper.sentience.tagger.rule
 
 import org.deepercreeper.sentience.document.Document
-import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
-import org.deepercreeper.sentience.tagger.Tag
-import org.deepercreeper.sentience.tagger.Tagger
+import org.deepercreeper.sentience.tagger.*
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 class RuleTaggerConfig(
@@ -42,14 +40,17 @@ abstract class AbstractConditionalTagger(document: Document) : Tagger(document),
                 update()
             }
         }
-        //TODO Add listener for ShutdownEvent that allows to react to the document ending
+        register<ShutdownEvent> { updateIndex(document.text.length) }
     }
 
     override fun get(key: String) = slots[key] ?: emptyList()
 
-    private fun token(tag: Tag) {
-        slots.values.forEach { slot -> slot.removeIf { tag.start - it.end > distance } }
-        index = tag.start
+    private fun token(tag: Tag) = updateIndex(tag.start)
+
+    private fun updateIndex(index: Int) {
+        this.index = index
+        update()
+        slots.values.forEach { slot -> slot.removeIf { index - it.end > distance } }
         update()
     }
 

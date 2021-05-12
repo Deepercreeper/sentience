@@ -7,7 +7,7 @@ import java.io.File
 
 @Service
 class OcrService {
-    private val tesseract = Tesseract().apply { setDatapath("E:/git/sentience/src/main/resources/tessdata") }
+    private val tesseract = Tesseract().apply { setDatapath("src/main/resources/tessdata") }
 
     @Synchronized
     fun ocr(file: File, language: Language = Language.ENGLISH): String {
