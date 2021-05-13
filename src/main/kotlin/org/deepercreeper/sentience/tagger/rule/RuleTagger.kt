@@ -13,8 +13,6 @@ class RuleTaggerConfig(
     var distance: Int
 ) : SimpleTaggerConfig({ RuleTagger(it, key, dependencies.toSet(), conditions.toSet(), targets.toSet(), distance) })
 
-typealias Slots = Map<String, List<Tag>>
-
 interface HasSlots {
     val distance: Int
 
