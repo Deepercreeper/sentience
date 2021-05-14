@@ -15,7 +15,7 @@ class TimeTaggerConfig : SimpleTaggerConfig(::TimeTagger)
 
 private const val DISTANCE = 10
 
-private val TIME_WITH_DAYTIME = Rule.disjoint(RawTimeTagger.KEY, DaytimeTagger.KEY) and Rule.maxInnerDistance(DISTANCE, RawTimeTagger.KEY, DaytimeTagger.KEY)
+private val TIME_WITH_DAYTIME = Rule.disjoint(RawTimeTagger.KEY, DaytimeTagger.KEY) and Rule.containsMaxInnerDistance(DISTANCE, RawTimeTagger.KEY, DaytimeTagger.KEY)
 
 private val TIME_WITHOUT_DAYTIME = Rule.without(RawTimeTagger.KEY, DISTANCE, DaytimeTagger.KEY)
 

@@ -60,101 +60,110 @@ interface Rule {
 
         fun ordered(vararg keys: String) = ordered(keys.toList())
 
-        fun ordered(keys: List<String>) = object : Rule {
-            init {
-                require(keys.size > 1)
-            }
+        fun ordered(keys: List<String>) = ordered(keys, false)
 
-            override val keys = keys.toSet()
+        fun containsOrdered(vararg keys: String) = ordered(keys.toList())
 
-            override fun search(status: Status): Sequence<SortedStatus> {
-                return keys.fold(sequenceOf(emptyList<Tag>())) { paths, key ->
-                    val tags = status[key]
-                    paths.flatMap { path -> tags.asSequence().filter { path.lastOrNull()?.end ?: 0 <= it.start }.map { path + it } }
-                }.map { status.with(it) }
-            }
+        fun containsOrdered(keys: List<String>) = ordered(keys, true)
 
-            override fun toString() = keys.joinToString(" < ")
-        }
+        private fun ordered(keys: List<String>, contains: Boolean) =
+            paths(keys, contains, keys.joinToString(" < ")) { path, tag -> path.lastOrNull()?.end ?: 0 <= tag.start }
 
         fun disjoint(vararg keys: String) = disjoint(keys.toList())
 
         fun disjoint(keys: Iterable<String>) = disjoint(keys.toSet())
 
-        fun disjoint(keys: Collection<String>) = object : Rule {
-            init {
-                require(keys.size > 1)
-            }
+        fun disjoint(keys: Collection<String>) = disjoint(keys, false)
 
-            override val keys = keys.toSet()
+        fun containsDisjoint(vararg keys: String) = containsDisjoint(keys.toList())
 
-            override fun search(status: Status): Sequence<Status> {
-                return keys.fold(sequenceOf(emptyList<Tag>())) { paths, key ->
-                    val tags = status[key]
-                    paths.flatMap { path -> tags.asSequence().filter { tag -> path.all { tag.end <= it.start || it.end <= tag.start } }.map { path + it } }
-                }.map { status.with(it) }
-            }
+        fun containsDisjoint(keys: Iterable<String>) = containsDisjoint(keys.toSet())
 
-            override fun toString() = keys.joinToString(" <> ")
-        }
+        fun containsDisjoint(keys: Collection<String>) = disjoint(keys, true)
+
+        private fun disjoint(keys: Collection<String>, contains: Boolean) =
+            paths(keys, contains, keys.joinToString(" <> ")) { path, tag -> path.all { tag.end <= it.start || it.end <= tag.start } }
 
         fun maxInnerDistance(distance: Int, vararg keys: String) = maxInnerDistance(distance, keys.toList())
 
         fun maxInnerDistance(distance: Int, keys: Iterable<String>) = maxInnerDistance(distance, keys.toSet())
 
-        fun maxInnerDistance(distance: Int, keys: Collection<String>) = object : Rule {
-            init {
-                require(keys.size > 1)
-            }
+        fun maxInnerDistance(distance: Int, keys: Collection<String>) = maxInnerDistance(distance, keys, false)
 
-            override val keys = keys.toSet()
+        fun containsMaxInnerDistance(distance: Int, vararg keys: String) = containsMaxInnerDistance(distance, keys.toList())
 
-            override fun search(status: Status): Sequence<Status> {
-                return keys.fold(sequenceOf(emptyList<Tag>())) { paths, key ->
-                    val tags = status[key]
-                    paths.flatMap { path -> tags.asSequence().filter { tag -> path.isEmpty() || path.any { tag.distanceTo(it) <= distance } }.map { path + it } }
-                }.map { status.with(it) }
-            }
+        fun containsMaxInnerDistance(distance: Int, keys: Iterable<String>) = containsMaxInnerDistance(distance, keys.toSet())
 
-            override fun toString() = "$distance <${keys.joinToString()}>"
-        }
+        fun containsMaxInnerDistance(distance: Int, keys: Collection<String>) = maxInnerDistance(distance, keys, true)
+
+        private fun maxInnerDistance(distance: Int, keys: Collection<String>, contains: Boolean) =
+            paths(keys, contains, "$distance <${keys.joinToString()}>") { path, tag -> path.isEmpty() || path.any { tag.distanceTo(it) <= distance } }
 
         fun maxOuterDistance(distance: Int, vararg keys: String) = maxOuterDistance(distance, keys.toList())
 
         fun maxOuterDistance(distance: Int, keys: Iterable<String>) = maxOuterDistance(distance, keys.toSet())
 
-        fun maxOuterDistance(distance: Int, keys: Collection<String>) = object : Rule {
+        fun maxOuterDistance(distance: Int, keys: Collection<String>) = maxOuterDistance(distance, keys, false)
+
+        fun containsMaxOuterDistance(distance: Int, vararg keys: String) = containsMaxOuterDistance(distance, keys.toList())
+
+        fun containsMaxOuterDistance(distance: Int, keys: Iterable<String>) = containsMaxOuterDistance(distance, keys.toSet())
+
+        fun containsMaxOuterDistance(distance: Int, keys: Collection<String>) = maxOuterDistance(distance, keys, true)
+
+        private fun maxOuterDistance(distance: Int, keys: Collection<String>, contains: Boolean) =
+            paths(keys, contains, "$distance <${keys.joinToString()}>") { path, tag -> path.all { tag.hullSizeWith(it) <= distance } }
+
+        private fun Tag.hullSizeWith(tag: Tag) = max(end, tag.end) - min(start, tag.start)
+
+        private fun interface PathFilter {
+            operator fun invoke(path: List<Tag>, tag: Tag): Boolean
+        }
+
+        private fun paths(keys: Collection<String>, contains: Boolean, display: String, minSize: Int = 2, filter: PathFilter) = object : Rule {
             init {
-                require(keys.size > 1)
+                require(keys.size >= minSize)
             }
 
             override val keys = keys.toSet()
 
             override fun search(status: Status): Sequence<Status> {
-                return keys.fold(sequenceOf(emptyList<Tag>())) { paths, key ->
+                val paths = keys.fold(sequenceOf(emptyList<Tag>())) { paths, key ->
                     val tags = status[key]
-                    paths.flatMap { path -> tags.asSequence().filter { tag -> path.all { tag.hullSizeWith(it) <= distance } }.map { path + it } }
-                }.map { status.with(it) }
+                    paths.flatMap { path -> tags.asSequence().filter { tag -> filter(path, tag) }.map { path + it } }
+                }
+                if (contains) return if (paths.any()) sequenceOf(status) else emptySequence()
+                return paths.map { status.with(it) }
             }
 
-            private fun Tag.hullSizeWith(tag: Tag) = max(end, tag.end) - min(start, tag.start)
-
-            override fun toString() = "$distance <${keys.joinToString()}>"
+            override fun toString() = display
         }
 
         fun without(key: String, distance: Int, vararg keys: String) = without(key, distance, keys.toSet())
 
         fun without(key: String, distance: Int, keys: Iterable<String>) = without(key, distance, keys.toSet())
 
-        fun without(key: String, distance: Int, keys: Set<String>) = object : Rule {
+        fun without(key: String, distance: Int, keys: Set<String>) = without(key, distance, keys, false)
+
+        fun containsWithout(key: String, distance: Int, vararg keys: String) = containsWithout(key, distance, keys.toSet())
+
+        fun containsWithout(key: String, distance: Int, keys: Iterable<String>) = containsWithout(key, distance, keys.toSet())
+
+        fun containsWithout(key: String, distance: Int, keys: Set<String>) = without(key, distance, keys, true)
+
+        private fun without(key: String, distance: Int, keys: Set<String>, contains: Boolean) = object : Rule {
             init {
                 require(keys.isNotEmpty())
             }
 
             override val keys = keys + key
 
-            override fun search(status: Status) = status[key].asSequence().filter { status.position.end - it.end >= distance }
-                .filter { tag -> keys.asSequence().flatMap { status[it].asSequence() }.none { tag.distanceTo(it) <= distance } }.map { status.with(it) }
+            override fun search(status: Status): Sequence<Status> {
+                val paths = status[key].asSequence().filter { status.position.end - it.end >= distance }
+                    .filter { tag -> keys.asSequence().flatMap { status[it].asSequence() }.none { tag.distanceTo(it) <= distance } }
+                if (contains) return if (paths.any()) sequenceOf(status) else emptySequence()
+                return paths.map { status.with(it) }
+            }
 
             override fun toString() = "$key without $keys in $distance"
         }
