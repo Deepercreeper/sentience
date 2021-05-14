@@ -4,8 +4,9 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
-import org.deepercreeper.sentience.tagger.rule.AbstractConditionalTagger
-import org.deepercreeper.sentience.tagger.rule.Condition
+import org.deepercreeper.sentience.tagger.rule.AbstractRuleTagger
+import org.deepercreeper.sentience.tagger.rule.Rule
+import org.deepercreeper.sentience.tagger.rule.Status
 import org.deepercreeper.sentience.util.get
 import java.time.LocalDate
 
@@ -13,23 +14,18 @@ class DateTaggerConfig : SimpleTaggerConfig(::DateTagger)
 
 private val KEYS = setOf(DayTagger.KEY, MonthTagger.KEY, YearTagger.KEY)
 
-private val CONDITION = Condition.Disjoint(KEYS.toList())
+class DateTagger(document: Document) : AbstractRuleTagger(document, 25) {
+    override val rule = Rule.disjoint(KEYS)
 
-class DateTagger(document: Document) : AbstractConditionalTagger(document) {
-    override val dependencies get() = KEYS
-
-    override val conditions = setOf(CONDITION)
-
-    override val distance get() = 25
-
-    override fun tag() = CONDITION.findAll(this).map { it.associateBy(Tag::key) }.forEach { tags ->
-        val day: Int = tags[DayTagger.KEY]!![Key.VALUE]!!
-        val month: Int = tags[MonthTagger.KEY]!![Key.VALUE]!!
-        val year: Int = tags[YearTagger.KEY]!![Key.VALUE]!!
+    override fun tag(status: Status): Sequence<Tag> {
+        val tags = KEYS.flatMap { status[it] }
+        val day: Int = status[DayTagger.KEY].first()[Key.VALUE]!!
+        val month: Int = status[MonthTagger.KEY].first()[Key.VALUE]!!
+        val year: Int = status[YearTagger.KEY].first()[Key.VALUE]!!
         val date = LocalDate.of(year, month, day)
-        val start = tags.values.minOf { it.start }
-        val end = tags.values.maxOf { it.end }
-        this.tags += Tag(KEY, start, end - start, Key.VALUE to date)
+        val start = tags.minOf { it.start }
+        val end = tags.maxOf { it.end }
+        return sequenceOf(Tag(KEY, start, end - start, Key.VALUE to date))
     }
 
     companion object {

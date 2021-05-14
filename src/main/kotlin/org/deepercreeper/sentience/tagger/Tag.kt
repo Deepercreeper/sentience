@@ -16,6 +16,12 @@ class Tag private constructor(val type: Type, val key: String, val start: Int, v
 
     constructor(key: String, start: Int, length: Int, vararg mappings: Pair<String, Any>, type: Type = Type.TAG) : this(type, key, start, length, ValueMap(*mappings))
 
+    fun distanceTo(tag: Tag) = when {
+        end <= tag.start -> tag.start - end
+        tag.end <= start -> start - tag.end
+        else -> 0
+    }
+
     override fun compareTo(other: Tag): Int {
         if (start != other.start) return start.compareTo(other.start)
         if (length != other.length) return length.compareTo(other.length)
