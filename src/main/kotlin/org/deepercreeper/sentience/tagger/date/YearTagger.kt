@@ -12,7 +12,7 @@ class YearTagger(document: Document, symbolService: SymbolService) : AbstractVal
 
     override fun mappings() = (0..9).asSequence().map { it.toString() }.map { it to it }
 
-    override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 0..9999 }
+    override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 0..9999 }?.let { sequenceOf(it) } ?: emptySequence()
 
     companion object {
         const val KEY = "year"

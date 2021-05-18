@@ -13,7 +13,7 @@ class DaytimeTagger(document: Document, symbolService: SymbolService) : Abstract
 
     override fun mappings() = sequenceOf("a", "p", "m").map { it to it } + sequenceOf("." to "")
 
-    override fun convert(text: String) = Daytime.of(text)
+    override fun convert(text: String) = Daytime.of(text)?.let { sequenceOf(it) } ?: emptySequence()
 
     companion object {
         const val KEY = "daytime"

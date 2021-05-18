@@ -29,7 +29,7 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
                 if (index + symbol.length > token.length) continue
                 if (!token.regionMatches(index, symbol, 0, symbol.length)) continue
                 if (index + symbol.length == token.length) {
-                    convert(number + representation)?.let { tags += Tag(key, tag.start, tag.length, Key.VALUE to it) }
+                    convert(number + representation).forEach { tags += Tag(key, tag.start, tag.length, Key.VALUE to it) }
                     return
                 }
                 indices += index + symbol.length to number + representation
@@ -39,5 +39,5 @@ abstract class AbstractValueTagger<T : Any>(document: Document, private val key:
 
     protected abstract fun mappings(): Sequence<Pair<String, String>>
 
-    protected abstract fun convert(text: String): T?
+    protected abstract fun convert(text: String): Sequence<T>
 }

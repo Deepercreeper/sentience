@@ -14,7 +14,8 @@ class DayTagger(document: Document, symbolService: SymbolService) : AbstractValu
 
     override fun mappings() = (0..9).asSequence().map { it.toString() }.map { it to it } + SUFFIXES.asSequence().map { it to "$" }
 
-    override fun convert(text: String) = text.takeIf { it.matches(Regex("^(\\d{1,2})\\$?$")) }?.replace("$", "")?.toInt()?.takeIf { it in 1..31 }
+    override fun convert(text: String) =
+        text.takeIf { it.matches(Regex("^(\\d{1,2})\\$?$")) }?.replace("$", "")?.toInt()?.takeIf { it in 1..31 }?.let { sequenceOf(it) } ?: emptySequence()
 
     companion object {
         const val KEY = "day"

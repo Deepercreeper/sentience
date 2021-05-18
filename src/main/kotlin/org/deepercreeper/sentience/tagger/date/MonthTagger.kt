@@ -1,7 +1,6 @@
 package org.deepercreeper.sentience.tagger.date
 
 import org.deepercreeper.sentience.document.Document
-import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tagger
@@ -28,7 +27,7 @@ class MonthTagger(document: Document, symbolService: SymbolService) : Tagger(doc
 
         override fun mappings() = (0..9).asSequence().map { "$it" }.map { it to it }
 
-        override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 1..12 }
+        override fun convert(text: String) = text.toIntOrNull()?.takeIf { it in 1..12 }?.let { sequenceOf(it) } ?: emptySequence()
     }
 
     override fun init() = taggers.forEach { it.init(engine) }

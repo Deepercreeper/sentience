@@ -5,7 +5,7 @@ import org.deepercreeper.sentience.util.ValueMap
 import java.util.*
 
 
-class Tag private constructor(val type: Type, val key: String, val start: Int, val length: Int, values: ValueMap) : Event, HasValues by values, Comparable<Tag> {
+class Tag private constructor(val type: Type, val key: String, val start: Int, val length: Int, private val values: ValueMap) : Event, HasValues by values, Comparable<Tag> {
     init {
         require(length > 0)
     }
@@ -29,11 +29,12 @@ class Tag private constructor(val type: Type, val key: String, val start: Int, v
         return key.compareTo(other.key)
     }
 
-    override fun equals(other: Any?) = other === this || other is Tag && type == other.type && key == other.key && start == other.start && end == other.end
+    override fun equals(other: Any?) =
+        other === this || other is Tag && type == other.type && key == other.key && start == other.start && end == other.end && values == other.values
 
-    override fun hashCode() = Objects.hash(type, key, start, end)
+    override fun hashCode() = Objects.hash(type, key, start, end, values)
 
-    override fun toString() = "$key[$start, $length]"
+    override fun toString() = "$key[$start, $length]$values"
 
     enum class Type {
         TOKEN,

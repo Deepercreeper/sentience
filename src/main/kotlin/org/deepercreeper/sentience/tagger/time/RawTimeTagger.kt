@@ -16,16 +16,16 @@ class RawTimeTagger(document: Document, symbolService: SymbolService) : Abstract
 
     override fun mappings() = (0..9).asSequence().map { "$it" }.map { it to it } + (":" to ":") + sequenceOf(".", ",").map { it to "" }
 
-    override fun convert(text: String): List<Int>? {
+    override fun convert(text: String): Sequence<List<Int>> {
         val values = text.split(':', '.').mapNotNull { it.toIntOrNull() }
-        if (values.size !in 1..3) return null
+        if (values.size !in 1..3) return emptySequence()
         val hour = values[0]
-        if (hour !in 0..23) return null
+        if (hour !in 0..23) return emptySequence()
         val minute = values.getOrElse(1) { 0 }
-        if (minute !in 0..59) return null
+        if (minute !in 0..59) return emptySequence()
         val second = values.getOrElse(2) { 0 }
-        if (second !in 0..59) return null
-        return listOf(hour, minute, second)
+        if (second !in 0..59) return emptySequence()
+        return sequenceOf(listOf(hour, minute, second))
     }
 
     companion object {

@@ -26,6 +26,12 @@ class ValueMap(mappings: Map<String, Any>) : HasValues {
     override operator fun <T : Any> set(key: String, value: T?) = if (value != null) map[key] = value else map -= key
 
     override operator fun <T : Any> get(key: String, type: KClass<T>): T? = map[key]?.let { type.cast(it) }
+
+    override fun equals(other: Any?) = this === other || other is ValueMap && map == other.map || other is HasValues && keys == other.keys && keys.all { map[it] == other[it] }
+
+    override fun hashCode() = map.hashCode()
+
+    override fun toString() = map.toString()
 }
 
 inline operator fun <reified T : Any> HasValues.get(key: String): T? = get(key, T::class)
