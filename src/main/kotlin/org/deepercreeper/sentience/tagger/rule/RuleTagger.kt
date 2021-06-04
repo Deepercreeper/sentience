@@ -10,11 +10,11 @@ import kotlin.math.max
 class RuleTaggerConfig(
     var key: String,
     var rule: Rule,
-    val targets: MutableSet<String>,
+    var targets: Set<String>,
     var length: Int
-) : SimpleTaggerConfig({ NewRuleTagger(it, length, key, rule, targets.toSet()) })
+) : SimpleTaggerConfig({ RuleTagger(it, length, key, rule, targets) })
 
-class NewRuleTagger(
+class RuleTagger(
     document: Document,
     length: Int,
     private val key: String,
