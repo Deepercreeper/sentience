@@ -1,6 +1,7 @@
 package org.deepercreeper.sentience.tagger.rule
 
 import org.deepercreeper.sentience.tagger.Tag
+import org.deepercreeper.sentience.util.associateAll
 
 interface Position {
     val start: Int
@@ -18,13 +19,9 @@ interface Status {
     operator fun get(key: String): List<Tag>
 
     fun with(tags: Iterable<Tag>) = object : Status {
-        private val keys = mutableMapOf<String, MutableList<Tag>>()
+        private val keys = tags.associateAll { it.key to it }
 
         override val position get() = this@Status.position
-
-        init {
-            tags.forEach { keys.computeIfAbsent(it.key) { mutableListOf() } += it }
-        }
 
         override fun get(key: String) = keys[key] ?: emptyList()
     }
@@ -35,13 +32,9 @@ interface Status {
 }
 
 class SortedStatus(override val position: Position, val tags: List<Tag>) : Status {
-    private val keys = mutableMapOf<String, MutableList<Tag>>()
+    private val keys = tags.associateAll { it.key to it }
 
     val size get() = tags.size
-
-    init {
-        tags.forEach { keys.computeIfAbsent(it.key) { mutableListOf() } += it }
-    }
 
     operator fun get(index: Int) = tags[index]
 

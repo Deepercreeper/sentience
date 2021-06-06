@@ -19,11 +19,11 @@ class RuleTagger(
     length: Int,
     private val key: String,
     override val rule: Rule,
-    private val targets: Set<String> = rule.keys,
+    private val targets: Set<String> = rule.dependencies,
     private val mapping: (Status) -> Map<String, Any> = { emptyMap() }
 ) : AbstractRuleTagger(document, length) {
     init {
-        require(rule.keys.containsAll(targets))
+        require(rule.dependencies.containsAll(targets))
     }
 
     override fun tag(status: Status): Sequence<Tag> {
@@ -50,7 +50,7 @@ abstract class AbstractRuleTagger(document: Document, private val length: Int) :
     override fun init() {
         register(TokenTagger.KEY, SubTokenTagger.KEY) { updatePosition(it.start) }
         register<ShutdownEvent> { updatePosition(document.text.length) }
-        rule.keys.forEach { key ->
+        rule.dependencies.forEach { key ->
             register(key) {
                 status.computeIfAbsent(key) { mutableListOf() } += it
                 update()

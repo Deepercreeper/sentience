@@ -1,15 +1,12 @@
 package org.deepercreeper.sentience.entity
 
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 
 @Entity
 class Symbol(
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
-    val text: String
+    @Column(unique = true) val text: String
 ) {
     constructor(text: String) : this(null, text)
 

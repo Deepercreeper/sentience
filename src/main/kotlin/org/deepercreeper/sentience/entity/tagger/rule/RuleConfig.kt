@@ -1,8 +1,6 @@
 package org.deepercreeper.sentience.entity.tagger.rule
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.service.SymbolService
-import org.deepercreeper.sentience.tagger.rule.Rule
 import org.deepercreeper.sentience.tagger.rule.RuleTaggerConfig
 import javax.persistence.*
 
@@ -11,18 +9,20 @@ import javax.persistence.*
 class RuleConfig(
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE) var id: Long? = null,
     var key: String,
-    //TODO Find a smart way to persist a rule in JPA
     @ElementCollection var targets: Set<String>,
     var length: Int,
+    @OneToOne var rule: RuleEntry? = null,
     @ManyToOne var group: ConfigGroup? = null
 ) {
-    constructor(key: String, targets: Set<String>, length: Int, group: ConfigGroup? = null) : this(null, key, targets, length, group)
+    constructor(key: String, targets: Set<String>, length: Int, rule: RuleEntry? = null, group: ConfigGroup? = null) : this(null, key, targets, length, rule, group)
 
-    fun config(symbolService: SymbolService) = RuleTaggerConfig(key, Rule.ordered(), targets, length)
+    constructor(rule: RuleTaggerConfig, group: ConfigGroup? = null): this(rule.key, rule.targets, rule.length, group = group)
 
-    override fun equals(other: Any?) = this === other || other is RuleConfig && key == other.key
-
-    override fun hashCode() = key.hashCode()
+    fun set(rule: RuleTaggerConfig) {
+        key = rule.key
+        targets = rule.targets
+        length = rule.length
+    }
 
     override fun toString() = key
 }
