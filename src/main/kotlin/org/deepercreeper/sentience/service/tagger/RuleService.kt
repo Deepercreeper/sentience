@@ -1,4 +1,4 @@
-package org.deepercreeper.sentience.service
+package org.deepercreeper.sentience.service.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
 import org.deepercreeper.sentience.entity.tagger.rule.RuleConfig
@@ -41,6 +41,13 @@ class RuleService(private val entryRepository: RuleEntryRepository, private val 
         entryRepository.saveAll(entries)
         ruleConfig.rule = entry
         return ruleRepository.save(ruleConfig).id!!
+    }
+
+    fun delete(id: Long) {
+        var ruleConfig = ruleRepository.getOne(id)
+        ruleConfig.rule = null
+        ruleConfig = ruleRepository.save(ruleConfig)
+        entryRepository.deleteByRule(ruleConfig)
     }
 
     private fun Rule.createEntry(config: RuleConfig, parent: RuleEntry? = null): Pair<RuleEntry, List<RuleEntry>> {

@@ -1,6 +1,7 @@
 package org.deepercreeper.sentience.service
 
 import org.deepercreeper.sentience.document.Document
+import org.deepercreeper.sentience.service.tagger.TaggerService
 import org.deepercreeper.sentience.tagger.TaggerEngine
 import org.springframework.stereotype.Service
 

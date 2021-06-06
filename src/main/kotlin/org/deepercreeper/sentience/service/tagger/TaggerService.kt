@@ -1,5 +1,6 @@
-package org.deepercreeper.sentience.service
+package org.deepercreeper.sentience.service.tagger
 
+import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.date.DateTagger
 import org.deepercreeper.sentience.tagger.time.TimeTagger
