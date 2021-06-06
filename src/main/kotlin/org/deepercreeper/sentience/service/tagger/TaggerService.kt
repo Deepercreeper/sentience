@@ -1,7 +1,7 @@
 package org.deepercreeper.sentience.service.tagger
 
+import org.deepercreeper.sentience.entity.tagger.ConfigGroup
 import org.deepercreeper.sentience.service.SymbolService
-import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.date.DateTagger
 import org.deepercreeper.sentience.tagger.time.TimeTagger
 import org.deepercreeper.sentience.tagger.token.SubTokenTagger
@@ -10,7 +10,7 @@ import org.deepercreeper.sentience.tagger.value.NumberTagger
 import org.springframework.stereotype.Service
 
 @Service
-class TaggerService(symbolService: SymbolService) {
+class TaggerService(symbolService: SymbolService, private val wordService: WordService, private val ruleService: RuleService) {
     private val defaultConfigs = listOf(
         TokenTagger.configs(),
         SubTokenTagger.configs(),
@@ -19,8 +19,5 @@ class TaggerService(symbolService: SymbolService) {
         TimeTagger.configs(symbolService)
     ).flatten()
 
-    private val _configs = mutableListOf<TaggerConfig>()
-
-    val configs get() = defaultConfigs + _configs
-
+    fun configs(group: ConfigGroup? = null) = defaultConfigs + wordService.configs(group) + ruleService.configs(group)
 }
