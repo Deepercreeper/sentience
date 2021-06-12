@@ -10,7 +10,7 @@ import org.deepercreeper.sentience.tagger.value.NumberTagger
 import org.springframework.stereotype.Service
 
 @Service
-class TaggerService(symbolService: SymbolService, private val wordService: WordService, private val ruleService: RuleService) {
+class TaggerService(symbolService: SymbolService, private val wordService: WordConfigService, private val ruleService: RuleConfigService) {
     private val defaultConfigs = listOf(
         TokenTagger.configs(),
         SubTokenTagger.configs(),

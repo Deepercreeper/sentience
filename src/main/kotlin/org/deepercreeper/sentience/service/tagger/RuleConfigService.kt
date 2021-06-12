@@ -8,11 +8,12 @@ import org.deepercreeper.sentience.repository.tagger.rule.RuleEntryRepository
 import org.deepercreeper.sentience.tagger.rule.Rule
 import org.deepercreeper.sentience.tagger.rule.RuleTaggerConfig
 import org.deepercreeper.sentience.util.associateAll
+import org.deepercreeper.sentience.util.update
 import org.springframework.stereotype.Service
 
 
 @Service
-class RuleService(private val entryRepository: RuleEntryRepository, private val ruleRepository: RuleConfigRepository) {
+class RuleConfigService(private val entryRepository: RuleEntryRepository, private val ruleRepository: RuleConfigRepository) {
     fun keys(group: ConfigGroup? = null) = ruleRepository.keys(group)
 
     fun configs(group: ConfigGroup? = null): Sequence<RuleTaggerConfig> {
@@ -24,9 +25,7 @@ class RuleService(private val entryRepository: RuleEntryRepository, private val 
     fun config(id: Long) = ruleRepository.getOne(id).parse()
 
     fun save(id: Long, rule: RuleTaggerConfig) {
-        var ruleConfig = ruleRepository.getOne(id)
-        ruleConfig.rule = null
-        ruleConfig = ruleRepository.save(ruleConfig)
+        val ruleConfig = ruleRepository.update(id) { it.apply { this.rule = null } }
         entryRepository.deleteByRule(ruleConfig)
         val (entry, entries) = rule.rule.createEntry(ruleConfig)
         entryRepository.saveAll(entries)
@@ -44,10 +43,9 @@ class RuleService(private val entryRepository: RuleEntryRepository, private val 
     }
 
     fun delete(id: Long) {
-        var ruleConfig = ruleRepository.getOne(id)
-        ruleConfig.rule = null
-        ruleConfig = ruleRepository.save(ruleConfig)
+        val ruleConfig = ruleRepository.update(id) { it.apply { this.rule = null } }
         entryRepository.deleteByRule(ruleConfig)
+        ruleRepository.deleteById(id)
     }
 
     private fun Rule.createEntry(config: RuleConfig, parent: RuleEntry? = null): Pair<RuleEntry, List<RuleEntry>> {
