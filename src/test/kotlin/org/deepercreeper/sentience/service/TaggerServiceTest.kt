@@ -7,11 +7,7 @@ import java.io.File
 import kotlin.test.Test
 
 class TaggerServiceTest {
-    private val symbolService = MockUtil.symbolService()
-
-    private val taggerService = TaggerService(symbolService)
-
-    private val tagService = TagService(taggerService)
+    private val tagService = TagService(MockUtil.taggerService(), MockUtil.context())
 
     private val ocrService = OcrService()
 

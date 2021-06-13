@@ -13,26 +13,23 @@ import kotlin.test.assertEquals
 
 
 class NumberTaggerTest {
-    private val service = MockUtil.symbolService()
+    private val relations = sequenceOf(
+        "0" to "O",
+        "1" to "l",
+        "5" to "S",
+        "2" to "Z"
+    ).map { (left, right) -> Relation(Symbol(left), Symbol(right)) }.toSet()
 
-    init {
-        sequenceOf(
-            "0" to "O",
-            "1" to "l",
-            "5" to "S",
-            "2" to "Z"
-        ).map { (left, right) -> Relation(Symbol(left), Symbol(right)) }.forEach {
-            service += it.symbols
-            service += it
-        }
-    }
+    private val service = MockUtil.symbolService(relations)
+
+    private val engine = TaggerEngine(MockUtil.context(service))
 
     private val configs = TokenTagger.configs() + NumberTagger.configs()
 
     @Test
     fun testSimple() {
         val document = Document("abc 01234 def 1ZOl23 ghi 45S67 jkl")
-        val engine = TaggerEngine(document, configs)
+        engine.init(document, configs)
         engine.process()
         engine.print()
         assertEquals(setOf(1234.0, 120123.0, 45567.0), engine.tags[NumberTagger.KEY].asSequence().map { it.get<Double>(Tagger.Key.VALUE) }.toSet())
@@ -41,7 +38,7 @@ class NumberTaggerTest {
     @Test
     fun testHard() {
         val document = Document("1.234 123.4567 12345.67 123.456.789 12.345.6789 12.3456.78")
-        val engine = TaggerEngine(document, configs)
+        engine.init(document, configs)
         engine.process()
         engine.print()
         val numbers = engine.tags[NumberTagger.KEY].asSequence().map { it.get<Double>(Tagger.Key.VALUE) }.toSet()

@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tagger
 import org.deepercreeper.sentience.tagger.TaggerEngine
+import org.deepercreeper.sentience.util.MockUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,10 +22,13 @@ class TokenTaggerTest {
         }
     }
 
-    private val engine = TaggerEngine(document, TokenTaggerConfig(), SimpleTaggerConfig { counter })
+    private val engine = TaggerEngine(MockUtil.context())
+
+    private val configs = TokenTagger.configs() + SimpleTaggerConfig { _, _ -> counter }
 
     @Test
     fun test() {
+        engine.init(document, configs)
         engine.process()
         engine.print()
         assertEquals(tokens.size, counter.count)

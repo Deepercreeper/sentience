@@ -3,8 +3,9 @@ package org.deepercreeper.sentience.tagger.word
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.entity.Symbol
+import org.deepercreeper.sentience.entity.tagger.word.WordTaggerConfig
 import org.deepercreeper.sentience.tagger.TaggerEngine
-import org.deepercreeper.sentience.tagger.token.TokenTaggerConfig
+import org.deepercreeper.sentience.tagger.token.TokenTagger
 import org.deepercreeper.sentience.util.MockUtil
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,10 +22,13 @@ class WordTaggerTest {
 
     private val service = MockUtil.symbolService(relations)
 
-    private val engine = TaggerEngine(document, TokenTaggerConfig(), WordTaggerConfig("word", setOf("lockbar"), emptyMap(), service))
+    private val engine = TaggerEngine(MockUtil.context(service))
+
+    private val configs = TokenTagger.configs() + WordTaggerConfig("word", setOf("lockbar"))
 
     @Test
     fun test() {
+        engine.init(document, configs)
         engine.process()
         engine.print()
         assertEquals(10, engine.tags["word"].size)
