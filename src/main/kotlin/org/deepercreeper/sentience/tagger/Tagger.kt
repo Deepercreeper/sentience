@@ -2,17 +2,18 @@ package org.deepercreeper.sentience.tagger
 
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.document.HasTags
+import org.springframework.context.ApplicationContext
 import kotlin.reflect.KClass
 
 
-//TODO This needs to be able to be saved to a single DB table row
-//TODO One table (each factory type needs to provide some config map) or many tables (each factory needs an entity that manages exactly one factory)
 fun interface TaggerConfig {
-    fun create(document: Document): Tagger
+    fun create(document: Document, context: ApplicationContext): Tagger
 }
 
-open class SimpleTaggerConfig(private val constructor: (Document) -> Tagger) : TaggerConfig {
-    override fun create(document: Document) = constructor(document)
+open class SimpleTaggerConfig(private val constructor: (Document, ApplicationContext) -> Tagger) : TaggerConfig {
+    constructor(constructor: (Document) -> Tagger) : this({ document, _ -> constructor(document) })
+
+    override fun create(document: Document, context: ApplicationContext) = constructor(document, context)
 }
 
 abstract class Tagger(protected val document: Document) {

@@ -1,29 +1,20 @@
 package org.deepercreeper.sentience.service.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.entity.tagger.word.WordConfig
-import org.deepercreeper.sentience.repository.tagger.word.WordConfigRepository
-import org.deepercreeper.sentience.service.SymbolService
-import org.deepercreeper.sentience.tagger.word.WordTaggerConfig
-import org.deepercreeper.sentience.util.update
+import org.deepercreeper.sentience.entity.tagger.word.WordTaggerConfig
+import org.deepercreeper.sentience.repository.tagger.word.WordTaggerConfigRepository
 import org.springframework.stereotype.Service
 
 
 @Service
-class WordConfigService(private val wordRepository: WordConfigRepository, private val symbolService: SymbolService) {
+class WordConfigService(private val wordRepository: WordTaggerConfigRepository) {
     fun keys(group: ConfigGroup? = null) = wordRepository.keys(group)
 
-    fun configs(group: ConfigGroup? = null) = wordRepository.findByGroup(group).asSequence().map { it.parse() }
+    fun configs(group: ConfigGroup? = null) = wordRepository.findByGroup(group).asSequence()
 
-    fun config(id: Long) = wordRepository.getOne(id).parse()
+    fun config(id: Long) = wordRepository.getOne(id)
 
-    fun config(key: String) = wordRepository.getByKey(key).parse()
-
-    fun save(id: Long, config: WordTaggerConfig) = wordRepository.update(id) { it.set(config) }
-
-    fun save(config: WordTaggerConfig, group: ConfigGroup? = null) = wordRepository.save(WordConfig(config, group)).id!!
+    fun save(config: WordTaggerConfig) = wordRepository.save(config)
 
     fun delete(id: Long) = wordRepository.deleteById(id)
-
-    private fun WordConfig.parse() = WordTaggerConfig(key, words, emptyMap(), symbolService)
 }

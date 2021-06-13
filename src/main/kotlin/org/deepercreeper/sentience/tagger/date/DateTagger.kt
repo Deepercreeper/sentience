@@ -4,13 +4,14 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
+import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.rule.AbstractRuleTagger
 import org.deepercreeper.sentience.tagger.rule.Rule
 import org.deepercreeper.sentience.tagger.rule.Status
 import org.deepercreeper.sentience.util.get
 import java.time.LocalDate
 
-class DateTaggerConfig : SimpleTaggerConfig(::DateTagger)
+object DateTaggerConfig : SimpleTaggerConfig(::DateTagger)
 
 private val KEYS = setOf(DayTagger.KEY, MonthTagger.KEY, YearTagger.KEY)
 
@@ -31,6 +32,6 @@ class DateTagger(document: Document) : AbstractRuleTagger(document, 25) {
     companion object {
         const val KEY = "date"
 
-        fun configs(symbolService: SymbolService) = listOf(DayTaggerConfig(symbolService), MonthTaggerConfig(symbolService), YearTaggerConfig(symbolService), DateTaggerConfig())
+        fun configs(): List<TaggerConfig> = listOf(DayTaggerConfig, MonthTaggerConfig, YearTaggerConfig, DateTaggerConfig)
     }
 }

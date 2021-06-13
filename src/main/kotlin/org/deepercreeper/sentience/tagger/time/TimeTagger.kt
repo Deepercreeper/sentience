@@ -4,6 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tag
+import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.rule.AbstractRuleTagger
 import org.deepercreeper.sentience.tagger.rule.Rule
 import org.deepercreeper.sentience.tagger.rule.Status
@@ -11,7 +12,7 @@ import org.deepercreeper.sentience.util.get
 import kotlin.math.max
 import kotlin.math.min
 
-class TimeTaggerConfig : SimpleTaggerConfig(::TimeTagger)
+object TimeTaggerConfig : SimpleTaggerConfig(::TimeTagger)
 
 private const val DISTANCE = 10
 
@@ -39,6 +40,6 @@ class TimeTagger(document: Document) : AbstractRuleTagger(document, 20){
     companion object{
         const val KEY = "time"
 
-        fun configs(symbolService: SymbolService) = listOf(RawTimeTaggerConfig(symbolService), DaytimeTaggerConfig(symbolService), TimeTaggerConfig())
+        fun configs(): List<TaggerConfig> = listOf(RawTimeTaggerConfig, DaytimeTaggerConfig, TimeTaggerConfig)
     }
 }

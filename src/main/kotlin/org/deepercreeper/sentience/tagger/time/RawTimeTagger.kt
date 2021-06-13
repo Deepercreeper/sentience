@@ -5,9 +5,10 @@ import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
+import org.springframework.beans.factory.getBean
 
 
-class RawTimeTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ RawTimeTagger(it, symbolService) })
+object RawTimeTaggerConfig : SimpleTaggerConfig({ document, context -> RawTimeTagger(document, context.getBean()) })
 
 class RawTimeTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<List<Int>>(document, KEY, symbolService) {
     override val keys get() = setOf(TokenTagger.KEY)

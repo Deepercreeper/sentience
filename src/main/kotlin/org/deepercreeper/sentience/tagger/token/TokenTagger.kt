@@ -4,7 +4,7 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.tagger.*
 
 
-class TokenTaggerConfig : SimpleTaggerConfig(::TokenTagger)
+object TokenTaggerConfig : SimpleTaggerConfig(::TokenTagger)
 
 class TokenTagger(document: Document) : Tagger(document) {
     override fun init() = register<ProcessEvent> { process() }
@@ -14,7 +14,7 @@ class TokenTagger(document: Document) : Tagger(document) {
     companion object {
         const val KEY = "token"
 
-        fun configs() = listOf(TokenTaggerConfig())
+        fun configs(): List<TaggerConfig> = listOf(TokenTaggerConfig)
     }
 }
 
@@ -33,7 +33,7 @@ class SubTokenTagger(document: Document) : Tagger(document) {
     companion object {
         const val KEY = "subToken"
 
-        fun configs() = listOf(SubTokenTaggerConfig())
+        fun configs(): List<TaggerConfig> = listOf(SubTokenTaggerConfig())
     }
 }
 

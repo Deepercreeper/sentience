@@ -4,8 +4,9 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
+import org.springframework.beans.factory.getBean
 
-class YearTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ YearTagger(it, symbolService) })
+object YearTaggerConfig : SimpleTaggerConfig({ document, context -> YearTagger(document, context.getBean()) })
 
 class YearTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Int>(document, KEY, symbolService) {
     override val maxLength get() = 4

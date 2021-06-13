@@ -4,8 +4,9 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
+import org.springframework.beans.factory.getBean
 
-class DayTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DayTagger(it, symbolService) })
+object DayTaggerConfig : SimpleTaggerConfig({ document, context -> DayTagger(document, context.getBean()) })
 
 private val SUFFIXES = setOf("st", "nd", "rd", "th")
 

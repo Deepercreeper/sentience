@@ -3,28 +3,32 @@ package org.deepercreeper.sentience.tagger
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.document.HasTags
 import org.deepercreeper.sentience.document.TagManager
+import org.deepercreeper.sentience.util.PrototypeComponent
 import org.deepercreeper.sentience.util.get
 import org.deepercreeper.sentience.util.logger
+import org.springframework.context.ApplicationContext
 
 
-class TaggerEngine(private val document: Document, configs: List<TaggerConfig>) {
+@PrototypeComponent
+class TaggerEngine(private val context: ApplicationContext) {
     private val tagRegistry = KeyRegistry<Tag, String> { it.key }
 
-    private val registry = TypeRegistry()
+    private val registry by lazy { TypeRegistry().also { it.register(tagRegistry::handle) } }
+
+    private val tagManager by lazy { TagManager().also { it.register(this::fire) } }
 
     private val eventManager = EventManager()
 
-    private val tagManager = TagManager()
-
-    init {
-        tagManager.register(this::fire)
-        registry.register<Tag> { tagRegistry.handle(it) }
-        configs.asSequence().map { it.create(document) }.forEach { it.init(this) }
-    }
+    private lateinit var document: Document
 
     val tags: HasTags get() = tagManager
 
-    constructor(document: Document, vararg taggers: TaggerConfig) : this(document, taggers.toList())
+    fun init(document: Document, vararg taggers: TaggerConfig) = init(document, taggers.toList())
+
+    fun init(document: Document, configs: List<TaggerConfig>) {
+        this.document = document
+        configs.asSequence().map { it.create(document, context) }.forEach { it.init(this) }
+    }
 
     fun register(tagRegistry: KeyRegistry<Tag, String>, registry: TypeRegistry) {
         this.tagRegistry.register(tagRegistry)

@@ -4,9 +4,10 @@ import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
+import org.springframework.beans.factory.getBean
 
 
-class DaytimeTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ DaytimeTagger(it, symbolService) })
+object DaytimeTaggerConfig : SimpleTaggerConfig({document, context -> DaytimeTagger(document, context.getBean()) })
 
 class DaytimeTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Daytime>(document, KEY, symbolService) {
     override val maxLength get() = 5

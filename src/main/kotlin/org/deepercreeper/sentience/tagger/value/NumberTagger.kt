@@ -3,10 +3,12 @@ package org.deepercreeper.sentience.tagger.value
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
+import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.token.TokenTagger
+import org.springframework.beans.factory.getBean
 
 
-class NumberTaggerConfig(private val symbolService: SymbolService) : SimpleTaggerConfig({ NumberTagger(it, symbolService) })
+object NumberTaggerConfig : SimpleTaggerConfig({ document, context -> NumberTagger(document, context.getBean()) })
 
 class NumberTagger(document: Document, symbolService: SymbolService) : AbstractValueTagger<Double>(document, KEY, symbolService) {
     override val keys get() = setOf(TokenTagger.KEY)
@@ -40,6 +42,6 @@ class NumberTagger(document: Document, symbolService: SymbolService) : AbstractV
     companion object {
         const val KEY = "number"
 
-        fun configs(symbolService: SymbolService) = listOf(NumberTaggerConfig(symbolService))
+        fun configs(): List<TaggerConfig> = listOf(NumberTaggerConfig)
     }
 }

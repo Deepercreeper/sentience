@@ -1,6 +1,8 @@
 package org.deepercreeper.sentience.util
 
+import org.springframework.context.annotation.Scope
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Component
 
 
 inline fun <T, K, V> Iterable<T>.associateAll(transform: (T) -> Pair<K, V>) = asSequence().associateAll(transform)
@@ -20,3 +22,8 @@ inline fun <T : Any, I : Any, R> JpaRepository<T, I>.update(id: I, operation: (T
     save(item)
     return result
 }
+
+@Target(AnnotationTarget.CLASS)
+@Component
+@Scope("prototype")
+annotation class PrototypeComponent

@@ -8,13 +8,6 @@ import org.deepercreeper.sentience.tagger.Tagger
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 
 
-class WordTaggerConfig(
-    var key: String,
-    var words: Set<String>,
-    var mappings: Map<String, Any>,
-    symbolService: SymbolService
-) : SimpleTaggerConfig({ WordTagger(it, key, words, mappings, symbolService) })
-
 class WordTagger(
     document: Document,
     private val key: String,

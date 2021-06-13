@@ -7,13 +7,6 @@ import org.deepercreeper.sentience.tagger.token.TokenTagger
 import kotlin.math.max
 
 
-class RuleTaggerConfig(
-    var key: String,
-    var rule: Rule,
-    var targets: Set<String>,
-    var length: Int
-) : SimpleTaggerConfig({ RuleTagger(it, length, key, rule, targets) })
-
 class RuleTagger(
     document: Document,
     length: Int,

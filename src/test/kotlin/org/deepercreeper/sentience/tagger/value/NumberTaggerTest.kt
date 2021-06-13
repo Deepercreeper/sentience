@@ -27,7 +27,7 @@ class NumberTaggerTest {
         }
     }
 
-    private val configs = TokenTagger.configs() + NumberTagger.configs(service)
+    private val configs = TokenTagger.configs() + NumberTagger.configs()
 
     @Test
     fun testSimple() {

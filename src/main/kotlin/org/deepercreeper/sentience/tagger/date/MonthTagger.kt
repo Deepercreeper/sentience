@@ -6,10 +6,11 @@ import org.deepercreeper.sentience.tagger.SimpleTaggerConfig
 import org.deepercreeper.sentience.tagger.Tagger
 import org.deepercreeper.sentience.tagger.value.AbstractValueTagger
 import org.deepercreeper.sentience.tagger.word.WordTagger
+import org.springframework.beans.factory.getBean
 import java.text.DateFormatSymbols
 import java.util.*
 
-class MonthTaggerConfig(symbolService: SymbolService) : SimpleTaggerConfig({ MonthTagger(it, symbolService) })
+object MonthTaggerConfig : SimpleTaggerConfig({document, context -> MonthTagger(document, context.getBean()) })
 
 class MonthTagger(document: Document, symbolService: SymbolService) : Tagger(document) {
     private val symbols = DateFormatSymbols.getInstance(Locale.ENGLISH)!!

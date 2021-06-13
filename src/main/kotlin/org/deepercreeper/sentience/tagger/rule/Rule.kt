@@ -27,7 +27,8 @@ interface Rule {
         DISJOINT(Disjoint::parse),
         MAX_INNER_DISTANCE(MaxInnerDistance::parse),
         MAX_OUTER_DISTANCE(MaxOuterDistance::parse),
-        WITHOUT(Without::parse);
+        WITHOUT(Without::parse),
+        EMPTY({ _, _ -> Empty });
 
         constructor(constructor: (Map<String, Any>) -> Rule) : this({ config, _ -> constructor(config) })
 
@@ -108,6 +109,8 @@ interface Rule {
         fun containsWithout(key: String, distance: Int, keys: Iterable<String>) = containsWithout(key, distance, keys.toSet())
 
         fun containsWithout(key: String, distance: Int, keys: Set<String>): Rule = Without(key, distance, keys, true)
+
+        fun empty(): Rule = Empty
     }
 
     private class And(override val rules: List<Rule>) : Rule {
@@ -162,7 +165,13 @@ interface Rule {
         }
     }
 
-    private abstract class PathRule(override val type: Type, protected val keys: Collection<String>, protected val contains: Boolean, private val display: String, minSize: Int = 2) : Rule {
+    private abstract class PathRule(
+        override val type: Type,
+        protected val keys: Collection<String>,
+        protected val contains: Boolean,
+        private val display: String,
+        minSize: Int = 2
+    ) : Rule {
         init {
             require(keys.size >= minSize)
         }
@@ -263,5 +272,15 @@ interface Rule {
             @Suppress("UNCHECKED_CAST")
             fun parse(config: Map<String, Any>) = Without(config["key"]!! as String, config["distance"]!! as Int, config["keys"]!! as Set<String>, config["contains"]!! as Boolean)
         }
+    }
+
+    private object Empty : Rule {
+        override val type get() = Type.EMPTY
+
+        override val dependencies get() = emptySet<String>()
+
+        override fun search(status: Status) = emptySequence<Status>()
+
+        override fun toString() = "Empty"
     }
 }
