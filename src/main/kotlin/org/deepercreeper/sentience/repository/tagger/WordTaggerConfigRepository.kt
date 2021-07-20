@@ -1,7 +1,7 @@
-package org.deepercreeper.sentience.repository.tagger.word
+package org.deepercreeper.sentience.repository.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.entity.tagger.word.WordTaggerConfig
+import org.deepercreeper.sentience.entity.tagger.WordTaggerConfig
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 

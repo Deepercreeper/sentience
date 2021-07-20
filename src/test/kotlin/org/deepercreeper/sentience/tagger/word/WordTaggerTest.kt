@@ -3,7 +3,7 @@ package org.deepercreeper.sentience.tagger.word
 import org.deepercreeper.sentience.document.Document
 import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.entity.Symbol
-import org.deepercreeper.sentience.entity.tagger.word.WordTaggerConfig
+import org.deepercreeper.sentience.entity.tagger.WordTaggerConfig
 import org.deepercreeper.sentience.tagger.TaggerEngine
 import org.deepercreeper.sentience.tagger.token.TokenTagger
 import org.deepercreeper.sentience.util.MockUtil

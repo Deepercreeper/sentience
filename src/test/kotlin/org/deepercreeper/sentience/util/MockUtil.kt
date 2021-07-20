@@ -3,8 +3,8 @@ package org.deepercreeper.sentience.util
 import org.deepercreeper.sentience.entity.Relation
 import org.deepercreeper.sentience.repository.RelationRepository
 import org.deepercreeper.sentience.repository.SymbolRepository
-import org.deepercreeper.sentience.repository.tagger.rule.RuleTaggerConfigRepository
-import org.deepercreeper.sentience.repository.tagger.word.WordTaggerConfigRepository
+import org.deepercreeper.sentience.repository.tagger.RuleTaggerConfigRepository
+import org.deepercreeper.sentience.repository.tagger.WordTaggerConfigRepository
 import org.deepercreeper.sentience.service.SymbolService
 import org.deepercreeper.sentience.service.tagger.TaggerService
 import org.mockito.kotlin.anyOrNull

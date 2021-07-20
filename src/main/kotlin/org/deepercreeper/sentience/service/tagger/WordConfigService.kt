@@ -1,8 +1,8 @@
 package org.deepercreeper.sentience.service.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.entity.tagger.word.WordTaggerConfig
-import org.deepercreeper.sentience.repository.tagger.word.WordTaggerConfigRepository
+import org.deepercreeper.sentience.entity.tagger.WordTaggerConfig
+import org.deepercreeper.sentience.repository.tagger.WordTaggerConfigRepository
 import org.springframework.stereotype.Service
 
 

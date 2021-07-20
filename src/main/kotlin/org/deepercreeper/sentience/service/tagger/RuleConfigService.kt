@@ -1,8 +1,8 @@
 package org.deepercreeper.sentience.service.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.entity.tagger.rule.RuleTaggerConfig
-import org.deepercreeper.sentience.repository.tagger.rule.RuleTaggerConfigRepository
+import org.deepercreeper.sentience.entity.tagger.RuleTaggerConfig
+import org.deepercreeper.sentience.repository.tagger.RuleTaggerConfigRepository
 import org.springframework.stereotype.Service
 
 

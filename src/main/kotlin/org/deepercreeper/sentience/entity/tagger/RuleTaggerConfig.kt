@@ -1,7 +1,6 @@
-package org.deepercreeper.sentience.entity.tagger.rule
+package org.deepercreeper.sentience.entity.tagger
 
 import org.deepercreeper.sentience.document.Document
-import org.deepercreeper.sentience.entity.tagger.ConfigGroup
 import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.rule.Rule
 import org.deepercreeper.sentience.tagger.rule.RuleTagger

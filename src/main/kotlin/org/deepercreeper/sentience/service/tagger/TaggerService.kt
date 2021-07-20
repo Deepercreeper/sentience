@@ -1,8 +1,8 @@
 package org.deepercreeper.sentience.service.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.repository.tagger.rule.RuleTaggerConfigRepository
-import org.deepercreeper.sentience.repository.tagger.word.WordTaggerConfigRepository
+import org.deepercreeper.sentience.repository.tagger.RuleTaggerConfigRepository
+import org.deepercreeper.sentience.repository.tagger.WordTaggerConfigRepository
 import org.deepercreeper.sentience.tagger.date.DateTagger
 import org.deepercreeper.sentience.tagger.time.TimeTagger
 import org.deepercreeper.sentience.tagger.token.SubTokenTagger

@@ -1,7 +1,6 @@
-package org.deepercreeper.sentience.entity.tagger.word
+package org.deepercreeper.sentience.entity.tagger
 
 import org.deepercreeper.sentience.document.Document
-import org.deepercreeper.sentience.entity.tagger.ConfigGroup
 import org.deepercreeper.sentience.tagger.TaggerConfig
 import org.deepercreeper.sentience.tagger.word.WordTagger
 import org.springframework.beans.factory.getBean

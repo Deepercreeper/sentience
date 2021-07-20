@@ -1,7 +1,7 @@
-package org.deepercreeper.sentience.repository.tagger.rule
+package org.deepercreeper.sentience.repository.tagger
 
 import org.deepercreeper.sentience.entity.tagger.ConfigGroup
-import org.deepercreeper.sentience.entity.tagger.rule.RuleTaggerConfig
+import org.deepercreeper.sentience.entity.tagger.RuleTaggerConfig
 import org.deepercreeper.sentience.util.associateAll
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
